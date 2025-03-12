@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>TCP 服务器监控</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .client-count {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-left: 15px;
+        }
+
+        .clients-section {
+            margin-bottom: 30px;
+        }
+
+        #clients {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #clients li {
+            background: #e3f2fd;
+            padding: 8px 15px;
+            border-radius: 15px;
+            color: #1976d2;
+        }
+
+        .messages-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 30px;
+        }
+
+        #messages div {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .message-time {
+            color: #666;
+            font-size: 0.85em;
+            margin-right: 8px;
+        }
+
+        .system-message {
+            background: #f8f9fa !important;
+            color: #666;
+            font-style: italic;
+        }
+
+        .send-message-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select, input, button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #1976d2;
+        }
+
+        input {
+            flex: 1;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>TCP 服务器监控</h2>
+            <span class="client-count">客户端连接数: <span id="client-count">0</span></span>
+        </div>
+
+        <div class="clients-section">
+            <h3>已连接客户端</h3>
+            <ul id="clients"></ul>
+        </div>
+
+        <div class="messages-section">
+            <h3>接收到的数据</h3>
+            <div class="messages-container">
+                <div id="messages"></div>
+            </div>
+        </div>
+
+        <div class="send-message-section">
+            <h3>发送消息</h3>
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <select id="client-select"></select>
+                <input type="text" id="message" placeholder="输入消息">
+                <button onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ws = new WebSocket("ws://localhost:8765");
+        
+        // 添加WebSocket连接状态处理
+        ws.onopen = function() {
+            console.log("WebSocket连接已建立");
+            document.querySelector('button').disabled = false;
+            // 请求初始化数据
+            ws.send(JSON.stringify({
+                type: "init",
+                message: "request_current_state"
+            }));
+        };
+
+        ws.onerror = function(error) {
+            console.error("WebSocket错误:", error);
+            alert("连接服务器失败，请检查服务器是否运行");
+        };
+
+        ws.onclose = function() {
+            console.log("WebSocket连接已关闭");
+            document.querySelector('button').disabled = true;
+        };
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === "client_update") {
+                document.getElementById("client-count").innerText = data.clients.length;
+                let clientList = document.getElementById("clients");
+                let select = document.getElementById("client-select");
+                clientList.innerHTML = "";
+                select.innerHTML = "";
+                data.clients.forEach(client => {
+                    let li = document.createElement("li");
+                    li.innerText = client;
+                    clientList.appendChild(li);
+
+                    let option = document.createElement("option");
+                    option.value = client;
+                    option.innerText = client;
+                    select.appendChild(option);
+                });
+            } else if (data.type === "message") {
+                let messages = document.getElementById("messages");
+                let div = document.createElement("div");
+                
+                // 如果是系统消息，添加特殊样式
+                if (data.addr === "系统") {
+                    div.className = "system-message";
+                }
+                
+                // 直接显示后端提供的消息
+                div.innerHTML = data.data;
+                
+                messages.appendChild(div);
+                messages.scrollTop = messages.scrollHeight;
+            }
+        };
+
+        function sendMessage() {
+            const select = document.getElementById("client-select");
+            const messageInput = document.getElementById("message");
+            const messageText = messageInput.value.trim();
+            
+            if (!select.value) {
+                alert("请选择一个客户端");
+                return;
+            }
+            
+            if (!messageText) {
+                alert("请输入消息内容");
+                return;
+            }
+
+            if (ws.readyState !== WebSocket.OPEN) {
+                alert("WebSocket连接已断开，请刷新页面重试");
+                return;
+            }
+
+            try {
+                const messageData = {
+                    type: "send",
+                    addr: select.value,
+                    message: messageText
+                };
+                
+                console.log("发送消息:", messageData);
+                ws.send(JSON.stringify(messageData));
+                
+                // 清空输入框
+                messageInput.value = "";
+            } catch (error) {
+                console.error("发送消息失败:", error);
+                alert("发送消息失败，请重试");
+            }
+        }
+
+        // 添加回车发送功能
+        document.getElementById("message").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
