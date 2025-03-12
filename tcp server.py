@@ -83,7 +83,17 @@ class TCPClient:
     def __init__(self, conn, addr_str):
         self.conn = conn
         self.addr_str = addr_str
+        self.wifi_name = None
+        self.sn = None
+        self.display_name = addr_str
         self.is_alive = True
+
+    def update_info(self, wifi_name, sn):
+        """更新客户端信息"""
+        self.wifi_name = wifi_name
+        self.sn = sn
+        self.display_name = f"{sn}" if sn else self.addr_str
+        logger.info(f"客户端信息已更新: {self.display_name}")
 
     def close(self):
         """安全关闭连接"""
@@ -119,7 +129,7 @@ async def websocket_server(websocket, path):
         # 发送当前连接状态
         await notify_web_clients({
             "type": "client_update",
-            "clients": list(tcp_clients.keys())
+            "clients": [client.display_name for client in tcp_clients.values()]
         })
         
         while True:
@@ -131,37 +141,47 @@ async def websocket_server(websocket, path):
                 # 响应初始化请求
                 await notify_web_clients({
                     "type": "client_update",
-                    "clients": list(tcp_clients.keys())
+                    "clients": [client.display_name for client in tcp_clients.values()]
                 })
             elif data["type"] == "send":
-                addr = data["addr"]
+                target_name = data["addr"]
                 msg = data["message"]
                 current_time = get_current_time()
-                if addr in tcp_clients and tcp_clients[addr].is_alive:
+                
+                # 查找目标客户端
+                target_client = None
+                for client in tcp_clients.values():
+                    if client.display_name == target_name:
+                        target_client = client
+                        break
+
+                if target_client and target_client.is_alive:
                     try:
-                        tcp_clients[addr].conn.sendall(msg.encode())
-                        logger.info(f"发送消息到TCP客户端 {addr}: {msg}")
-                        # 发送消息确认给Web客户端
+                        target_client.conn.sendall(msg.encode())
+                        logger.info(f"发送消息到TCP客户端 {target_name}: {msg}")
                         await notify_web_clients({
                             "type": "message",
                             "addr": "系统",
-                            "data": format_message("系统", f"发送 [{addr}]: {msg}", current_time)
+                            "data": format_message("系统", f"发送 [{target_name}]: {msg}", current_time)
                         })
                     except Exception as e:
-                        logger.error(f"发送消息到TCP客户端 {addr} 失败: {str(e)}")
-                        tcp_clients[addr].is_alive = False
+                        logger.error(f"发送消息到TCP客户端 {target_name} 失败: {str(e)}")
+                        target_client.is_alive = False
                         await notify_web_clients({
                             "type": "message",
                             "addr": "系统",
                             "data": format_message("系统", f"发送失败: 客户端可能已断开，消息内容: {msg}", current_time)
                         })
-                        await notify_web_clients({"type": "client_update", "clients": list(tcp_clients.keys())})
+                        await notify_web_clients({
+                            "type": "client_update", 
+                            "clients": [c.display_name for c in tcp_clients.values()]
+                        })
                 else:
-                    logger.warning(f"目标TCP客户端不存在或已断开: {addr}")
+                    logger.warning(f"目标TCP客户端不存在或已断开: {target_name}")
                     await notify_web_clients({
                         "type": "message",
                         "addr": "系统",
-                        "data": format_message("系统", f"发送失败: 客户端不存在或已断开，目标客户端: [{addr}]", current_time)
+                        "data": format_message("系统", f"发送失败: 客户端不存在或已断开，目标客户端: [{target_name}]", current_time)
                     })
     except Exception as e:
         logger.error(f"WebSocket错误: {str(e)}")
@@ -187,6 +207,25 @@ def process_message_queue():
             break
         asyncio.run_coroutine_threadsafe(notify_web_clients(message), loop)
 
+def parse_client_info(message):
+    """解析客户端连接消息中的信息"""
+    try:
+        # 解析Wifi名称
+        wifi_start = message.find("Wifi :") + 6
+        wifi_end = message.find(",", wifi_start)
+        wifi_name = message[wifi_start:wifi_end].strip() if wifi_start > 5 else None
+
+        # 解析SN号
+        sn_start = message.find("SN:") + 3
+        sn_end = message.find(",", sn_start)
+        sn = message[sn_start:sn_end].strip() if sn_start > 2 else None
+
+        logger.info(f"解析到客户端信息 - Wifi: {wifi_name}, SN: {sn}")
+        return wifi_name, sn
+    except Exception as e:
+        logger.error(f"解析客户端信息失败: {str(e)}")
+        return None, None
+
 def handle_tcp_client(conn, addr):
     """ 处理TCP客户端数据接收 """
     addr_str = addr_to_str(addr)
@@ -201,7 +240,7 @@ def handle_tcp_client(conn, addr):
         "addr": "系统",
         "data": format_message("系统", f"新客户端连接: {addr_str}", current_time)
     })
-    message_queue.put({"type": "client_update", "clients": list(tcp_clients.keys())})
+    message_queue.put({"type": "client_update", "clients": [c.display_name for c in tcp_clients.values()]})
     
     try:
         while client.is_alive:
@@ -211,17 +250,33 @@ def handle_tcp_client(conn, addr):
                     break
                 current_time = get_current_time()
                 decoded_data = data.decode()
+
+                # 检查是否是首次连接消息
+                if "Wifi :" in decoded_data and "SN:" in decoded_data:
+                    wifi_name, sn = parse_client_info(decoded_data)
+                    if wifi_name and sn:
+                        client.update_info(wifi_name, sn)
+                        # 更新客户端列表并发送通知
+                        message_queue.put({
+                            "type": "message",
+                            "addr": "系统",
+                            "data": format_message("系统", f"识别到设备信息 - Wifi: {wifi_name}, SN: {sn}", current_time)
+                        })
+                        message_queue.put({"type": "client_update", "clients": [c.display_name for c in tcp_clients.values()]})
+                        continue  # 跳过这条连接消息的显示
+
+                # 发送普通消息
                 msg = {
                     "type": "message",
-                    "addr": addr_str,
-                    "data": format_message(addr_str, decoded_data, current_time)
+                    "addr": client.display_name,
+                    "data": format_message(client.display_name, decoded_data, current_time)
                 }
                 message_queue.put(msg)
-                logger.info(f"收到TCP客户端 {addr_str} 消息: {decoded_data}")
+                logger.info(f"收到TCP客户端 {client.display_name} 消息: {decoded_data}")
             except socket.timeout:
                 continue
             except Exception as e:
-                logger.error(f"接收TCP客户端 {addr_str} 数据时出错: {str(e)}")
+                logger.error(f"接收TCP客户端 {client.display_name} 数据时出错: {str(e)}")
                 break
     finally:
         client.close()
