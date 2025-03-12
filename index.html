@@ -27,12 +27,32 @@
             border-bottom: 2px solid #eee;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+
+        .log-button {
+            background: #FF9800;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .log-button:hover {
+            background: #F57C00;
+        }
+
         .client-count {
             background: #4CAF50;
             color: white;
             padding: 10px 20px;
             border-radius: 20px;
-            margin-left: 15px;
         }
 
         .clients-section {
@@ -156,7 +176,10 @@
     <div class="container">
         <div class="header">
             <h2>TCP 服务器监控</h2>
-            <span class="client-count">客户端连接数: <span id="client-count">0</span></span>
+            <div class="header-right">
+                <a href="logs.html" class="log-button">查看日志</a>
+                <span class="client-count">客户端连接数: <span id="client-count">0</span></span>
+            </div>
         </div>
 
         <div class="clients-section">
@@ -186,7 +209,14 @@
     </div>
 
     <script>
-        const ws = new WebSocket("ws://localhost:8765");
+        // 服务器配置
+        const SERVER_HOST = 'localhost';
+        const SERVER_PORT = 8080;
+        const WS_PORT = 8765;
+        const SERVER_URL = `http://${SERVER_HOST}:${SERVER_PORT}`;
+        const WS_URL = `ws://${SERVER_HOST}:${WS_PORT}`;
+
+        const ws = new WebSocket(WS_URL);
         let shouldAutoScroll = true;
         let messagesContainer = null;
         let allMessages = [];  // 存储所有消息

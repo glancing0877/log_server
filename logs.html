@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>TCP 服务器日志</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .back-button {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background: #555;
+        }
+
+        .log-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .log-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .log-name {
+            font-size: 16px;
+            color: #333;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .log-size {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .log-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-actions button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+
+        .view-btn {
+            background: #2196F3;
+        }
+
+        .view-btn:hover {
+            background: #1976d2;
+        }
+
+        .download-btn {
+            background: #4CAF50;
+        }
+
+        .download-btn:hover {
+            background: #388E3C;
+        }
+
+        .log-content {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            background: #1e1e1e;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 500px;
+            overflow: auto;
+            color: #d4d4d4;
+            border: 1px solid #333;
+            position: relative;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .log-content.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .log-content-inner {
+            white-space: pre;
+            min-width: fit-content;
+        }
+
+        .log-line {
+            display: flex;
+            padding: 2px 5px;
+            min-height: 20px;
+        }
+
+        .log-line:hover {
+            background: #2d2d2d;
+        }
+
+        .line-number {
+            color: #858585;
+            margin-right: 15px;
+            user-select: none;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .line-content {
+            flex: 1;
+            min-width: max-content;
+        }
+
+        .timestamp {
+            color: #569cd6;
+        }
+
+        .log-level {
+            color: #4ec9b0;
+        }
+
+        .thread-name {
+            color: #ce9178;
+        }
+
+        .message {
+            color: #d4d4d4;
+        }
+
+        .error-message {
+            color: #f44747;
+        }
+
+        .warning-message {
+            color: #dcdcaa;
+        }
+
+        .refresh-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .refresh-button:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>服务器日志</h2>
+            <div>
+                <button onclick="refreshLogs()" class="refresh-button">刷新</button>
+                <a href="index.html" class="back-button">返回监控页面</a>
+            </div>
+        </div>
+        <ul id="log-list" class="log-list">
+            <!-- 日志列表将通过JavaScript动态填充 -->
+        </ul>
+    </div>
+
+    <script>
+        // ANSI颜色代码映射
+        const ANSI_COLORS = {
+            '30': '#000000', // 黑
+            '31': '#cd3131', // 红
+            '32': '#0dbc79', // 绿
+            '33': '#e5e510', // 黄
+            '34': '#2472c8', // 蓝
+            '35': '#bc3fbc', // 紫
+            '36': '#11a8cd', // 青
+            '37': '#e5e5e5', // 白
+            '90': '#666666', // 亮黑
+            '91': '#f14c4c', // 亮红
+            '92': '#23d18b', // 亮绿
+            '93': '#f5f543', // 亮黄
+            '94': '#3b8eea', // 亮蓝
+            '95': '#d670d6', // 亮紫
+            '96': '#29b8db', // 亮青
+            '97': '#ffffff'  // 亮白
+        };
+
+        // 解析ANSI颜色代码
+        function parseAnsiColor(text) {
+            const regex = /\u001b\[(\d+)m(.*?)(?=\u001b|\n|$)/g;
+            let result = text;
+            let match;
+            
+            // 替换所有ANSI颜色代码
+            while ((match = regex.exec(text)) !== null) {
+                const [fullMatch, colorCode, content] = match;
+                const color = ANSI_COLORS[colorCode] || '#d4d4d4';
+                result = result.replace(fullMatch, `<span style="color: ${color}">${content}</span>`);
+            }
+            
+            // 移除任何剩余的ANSI代码
+            return result.replace(/\u001b\[\d+m/g, '');
+        }
+
+        // 服务器配置
+        const SERVER_HOST = 'localhost';
+        const SERVER_PORT = 8080;
+        const SERVER_URL = `http://${SERVER_HOST}:${SERVER_PORT}`;
+
+        // 获取日志文件列表
+        async function fetchLogs() {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/logs`);
+                const logs = await response.json();
+                displayLogs(logs);
+            } catch (error) {
+                console.error('获取日志列表失败:', error);
+                alert('获取日志列表失败，请检查服务器状态');
+            }
+        }
+
+        // 显示日志列表
+        function displayLogs(logs) {
+            const logList = document.getElementById('log-list');
+            logList.innerHTML = '';
+            
+            logs.forEach(log => {
+                const li = document.createElement('li');
+                li.className = 'log-item';
+                
+                li.innerHTML = `
+                    <div class="log-header">
+                        <div class="log-info">
+                            <span class="log-name">${log.name}</span>
+                            <span class="log-size">${formatSize(log.size)}</span>
+                        </div>
+                        <div class="log-actions">
+                            <button onclick="viewLog('${log.name}')" class="view-btn">查看</button>
+                            <button onclick="downloadLog('${log.name}')" class="download-btn">下载</button>
+                        </div>
+                    </div>
+                    <div id="content-${log.name}" class="log-content">
+                        <div class="log-content-inner"></div>
+                    </div>
+                `;
+                
+                logList.appendChild(li);
+            });
+        }
+
+        // 格式化文件大小
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 查看日志内容
+        async function viewLog(logName) {
+            const contentDiv = document.getElementById(`content-${logName}`);
+            
+            if (contentDiv.classList.contains('active')) {
+                contentDiv.classList.remove('active');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URL}/api/logs/view/${logName}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const content = await response.text();
+                
+                // 处理日志内容
+                const lines = content.split('\n');
+                let formattedContent = '';
+                
+                lines.forEach((line, index) => {
+                    if (!line.trim()) return;
+                    
+                    const parts = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) - (\w+) - \[([^\]]+)\] - (.+)$/);
+                    
+                    if (parts) {
+                        const [_, timestamp, level, threadName, message] = parts;
+                        const parsedMessage = parseAnsiColor(message);
+                        
+                        formattedContent += `<div class="log-line">
+                            <span class="line-number">${index + 1}</span>
+                            <div class="line-content">
+                                <span class="timestamp">${timestamp}</span> - 
+                                <span class="log-level">${level}</span> - 
+                                <span class="thread-name">[${threadName}]</span> - 
+                                <span class="message">${parsedMessage}</span>
+                            </div>
+                        </div>`;
+                    } else {
+                        const parsedLine = parseAnsiColor(line);
+                        formattedContent += `<div class="log-line">
+                            <span class="line-number">${index + 1}</span>
+                            <div class="line-content"><span class="message">${parsedLine}</span></div>
+                        </div>`;
+                    }
+                });
+                
+                const innerContent = contentDiv.querySelector('.log-content-inner');
+                innerContent.innerHTML = formattedContent;
+                contentDiv.classList.add('active');
+            } catch (error) {
+                console.error('获取日志内容失败:', error);
+                alert('获取日志内容失败: ' + error.message);
+            }
+        }
+
+        // 下载日志文件
+        function downloadLog(logName) {
+            const downloadUrl = `${SERVER_URL}/api/logs/download/${logName}`;
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = logName;  // 设置下载文件名
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 刷新日志列表
+        function refreshLogs() {
+            fetchLogs();
+        }
+
+        // 页面加载时获取日志列表
+        document.addEventListener('DOMContentLoaded', fetchLogs);
+    </script>
+</body>
+</html> 
