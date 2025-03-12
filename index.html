@@ -141,6 +141,15 @@
             color: #333;
             margin-top: 0;
         }
+
+        .message-count {
+            background: #1976d2;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -270,6 +279,50 @@
             document.querySelector('button').disabled = true;
         };
 
+        // 获取每个客户端的消息数量
+        function getClientMessageCount(clientId) {
+            return allMessages.filter(msg => 
+                msg.addr === clientId || 
+                (msg.addr === "系统" && msg.data.toLowerCase().includes(clientId.toLowerCase()))
+            ).length;
+        }
+
+        // 更新客户端列表项
+        function updateClientListItem(client) {
+            const li = document.createElement("li");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = `client-${client}`;
+            checkbox.value = client;
+            checkbox.checked = filteredClients.has(client);
+            checkbox.onchange = () => updateClientFilter(checkbox);
+            
+            const label = document.createElement("label");
+            label.htmlFor = `client-${client}`;
+            label.textContent = client;
+            
+            const count = document.createElement("span");
+            count.className = "message-count";
+            count.textContent = getClientMessageCount(client);
+            
+            li.appendChild(checkbox);
+            li.appendChild(label);
+            li.appendChild(count);
+            return li;
+        }
+
+        // 更新所有客户端的消息计数
+        function updateAllClientCounts() {
+            const clientList = document.getElementById("clients");
+            const clients = Array.from(clientList.children);
+            
+            clients.forEach(li => {
+                const clientId = li.querySelector('input').value;
+                const countSpan = li.querySelector('.message-count');
+                countSpan.textContent = getClientMessageCount(clientId);
+            });
+        }
+
         ws.onmessage = function(event) {
             const data = JSON.parse(event.data);
             if (data.type === "client_update") {
@@ -280,21 +333,8 @@
                 select.innerHTML = "";
                 
                 data.clients.forEach(client => {
-                    // 创建复选框列表项
-                    let li = document.createElement("li");
-                    let checkbox = document.createElement("input");
-                    checkbox.type = "checkbox";
-                    checkbox.id = `client-${client}`;
-                    checkbox.value = client;
-                    checkbox.checked = filteredClients.has(client);
-                    checkbox.onchange = () => updateClientFilter(checkbox);
-                    
-                    let label = document.createElement("label");
-                    label.htmlFor = `client-${client}`;
-                    label.textContent = client;
-                    
-                    li.appendChild(checkbox);
-                    li.appendChild(label);
+                    // 使用新的创建列表项函数
+                    const li = updateClientListItem(client);
                     clientList.appendChild(li);
 
                     // 更新发送消息的下拉框
@@ -311,6 +351,9 @@
             } else if (data.type === "message") {
                 // 保存消息
                 allMessages.push(data);
+                
+                // 更新消息计数
+                updateAllClientCounts();
                 
                 // 如果消息应该显示，则添加到界面
                 if (shouldShowMessage(data)) {
