@@ -187,42 +187,9 @@
     font-size: 14px;
     transition: background 0.3s;
     display: inline-block;
+    margin-bottom: 20px;
 }
 
 .back-button:hover {
     background: #F57C00;
-}
-
-.header-right {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    align-items: center;
-    margin: 10px 0;
-}
-
-.refresh-button {
-    background: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s;
-}
-
-.refresh-button:hover {
-    background: #388E3C;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.header h2 {
-    margin: 0;
-}
+} 
