@@ -1,0 +1,97 @@
+.client-count {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+}
+
+.clients-section {
+    margin-bottom: 30px;
+}
+
+#clients {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#clients li {
+    background: #e3f2fd;
+    padding: 8px 15px;
+    border-radius: 15px;
+    color: #1976d2;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#clients li input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+#clients li label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.client-filter-controls {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.client-filter-controls button {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.messages-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    height: 300px;
+    overflow-y: auto;
+    margin-bottom: 30px;
+}
+
+#messages div {
+    padding: 10px;
+    margin: 5px 0;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.message-time {
+    color: #666;
+    font-size: 0.85em;
+    margin-right: 8px;
+}
+
+.system-message {
+    background: #f8f9fa !important;
+    color: #666;
+    font-style: italic;
+}
+
+.send-message-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+input {
+    flex: 1;
+}
+
+.message-count {
+    background: #1976d2;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-left: 5px;
+} 
