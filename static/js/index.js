@@ -12,6 +12,81 @@ let allMessages = [];  // 存储所有消息
 let filteredClients = new Set();  // 存储选中的客户端
 let messageHistory = [];  // 存储发送历史记录
 
+// ANSI颜色代码映射
+const ANSI_COLORS = {
+    // 前景色
+    '30': 'black',
+    '31': 'red',
+    '32': 'green',
+    '33': 'yellow',
+    '34': 'blue',
+    '35': 'magenta',
+    '36': 'cyan',
+    '37': 'white',
+    '90': '#888', // 亮黑（灰色）
+    '91': '#f44336', // 亮红
+    '92': '#4caf50', // 亮绿
+    '93': '#ffc107', // 亮黄
+    '94': '#2196f3', // 亮蓝
+    '95': '#e91e63', // 亮洋红
+    '96': '#00bcd4', // 亮青
+    '97': '#fff',  // 亮白
+    // 背景色
+    '40': 'black',
+    '41': 'red',
+    '42': 'green',
+    '43': 'yellow',
+    '44': 'blue',
+    '45': 'magenta',
+    '46': 'cyan',
+    '47': 'white',
+    '100': '#333', // 亮黑（灰色）背景
+    '101': '#ffebee', // 亮红背景
+    '102': '#e8f5e9', // 亮绿背景
+    '103': '#fff8e1', // 亮黄背景
+    '104': '#e3f2fd', // 亮蓝背景
+    '105': '#fce4ec', // 亮洋红背景
+    '106': '#e0f7fa', // 亮青背景
+    '107': '#fff',  // 亮白背景
+    // 样式
+    '0': 'reset',   // 重置
+    '1': 'bold',    // 粗体
+    '3': 'italic',  // 斜体
+    '4': 'underline' // 下划线
+};
+
+// 创建ANSI转换器实例
+const ansiUp = new AnsiUp();
+ansiUp.use_classes = true;  // 使用CSS类而不是内联样式
+ansiUp.escape_for_html = true;  // 转义HTML字符
+
+// 解析ANSI转义序列
+function parseAnsiToHtml(text) {
+    try {
+        // 调试日志
+        console.log('Original text:', text);
+        
+        // 处理转义字符
+        text = text.replace(/\\u001b/g, '\u001b')
+                  .replace(/\\x1b/g, '\u001b')
+                  .replace(/\\033/g, '\u001b')
+                  .replace(/\\n/g, '\n')
+                  .replace(/\\r/g, '\r')
+                  .replace(/\[(\d+;)*\d+m/g, (match) => `\u001b${match}`);  // 处理可能缺少转义字符的颜色代码
+        
+        // 使用ansi_up转换
+        const html = ansiUp.ansi_to_html(text);
+        
+        // 调试日志
+        console.log('Converted HTML:', html);
+        
+        return html;
+    } catch (error) {
+        console.error('Error parsing ANSI:', error);
+        return text;
+    }
+}
+
 // 从localStorage加载历史记录
 function loadMessageHistory() {
     const savedHistory = localStorage.getItem('messageHistory');
@@ -116,7 +191,8 @@ function refreshMessages() {
             if (msg.addr === "系统") {
                 div.className = "system-message";
             }
-            div.innerHTML = msg.data;
+            // 使用ANSI解析器处理消息内容
+            div.innerHTML = parseAnsiToHtml(msg.data);
             messagesDiv.appendChild(div);
         }
     });
@@ -249,7 +325,8 @@ ws.onmessage = function(event) {
                 div.className = "system-message";
             }
             
-            div.innerHTML = data.data;
+            // 使用ANSI解析器处理消息内容
+            div.innerHTML = parseAnsiToHtml(data.data);
             messages.appendChild(div);
             scrollToBottom();
         }
