@@ -34,9 +34,11 @@ function fetchSNList() {
 }
 
 function fetchDateList() {
+    console.log('开始获取日期列表，当前SN:', currentSN);
     fetch(`/api/logs/date-list/${currentSN}`)
         .then(response => response.json())
         .then(dates => {
+            console.log('获取到日期列表:', dates);
             const dateSelect = document.getElementById('date-select');
             dateSelect.innerHTML = '';
             
@@ -51,10 +53,13 @@ function fetchDateList() {
             if (dates.length > 0) {
                 currentDate = dates[0];
                 dateSelect.value = currentDate;
+                console.log('设置当前日期为:', currentDate);
                 // 使用setTimeout确保DOM更新后再获取日志内容
                 setTimeout(() => {
                     fetchLogContent();
                 }, 100);
+            } else {
+                console.warn('没有找到任何日期');
             }
         })
         .catch(error => {
@@ -85,10 +90,11 @@ function fetchLogContent() {
         ? `default/${currentDate}.log`
         : `${currentSN}/${currentDate}.log`;
     
-    console.log('正在获取日志内容:', path);
+    console.log('正在获取日志内容，路径:', path);
         
     fetch(`/api/logs/content/${path}`)
         .then(response => {
+            console.log('日志内容响应状态:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -96,6 +102,7 @@ function fetchLogContent() {
         })
         .then(content => {
             console.log('成功获取日志内容，长度:', content.length);
+            console.log('日志内容前100个字符:', content.substring(0, 100));
             displayLogContent(content);
         })
         .catch(error => {
@@ -106,9 +113,16 @@ function fetchLogContent() {
 }
 
 function displayLogContent(content) {
+    console.log('开始处理日志内容');
     const container = document.querySelector('.log-lines-container');
+    if (!container) {
+        console.error('找不到日志容器元素 .log-lines-container');
+        return;
+    }
+    
     // 先按行分割，然后过滤掉空行或只包含空白字符的行
     const lines = content.split('\n').filter(line => line.trim());
+    console.log('处理后的日志行数:', lines.length);
     let formattedContent = '';
     
     lines.forEach((line, index) => {
@@ -132,7 +146,9 @@ function displayLogContent(content) {
         }
     });
     
+    console.log('设置日志内容到容器');
     container.innerHTML = formattedContent;
+    console.log('日志内容设置完成');
 }
 
 // ANSI颜色代码映射
