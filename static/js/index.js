@@ -11,6 +11,41 @@ let messagesContainer = null;
 let allMessages = [];  // 存储所有消息
 let filteredClients = new Set();  // 存储选中的客户端
 
+// ANSI颜色代码映射
+const ANSI_COLORS = {
+    '30': '#000000', // 黑
+    '31': '#cd3131', // 红
+    '32': '#0dbc79', // 绿
+    '33': '#e5e510', // 黄
+    '34': '#2472c8', // 蓝
+    '35': '#bc3fbc', // 紫
+    '36': '#11a8cd', // 青
+    '37': '#e5e5e5', // 白
+    '90': '#666666', // 亮黑
+    '91': '#f14c4c', // 亮红
+    '92': '#23d18b', // 亮绿
+    '93': '#f5f543', // 亮黄
+    '94': '#3b8eea', // 亮蓝
+    '95': '#d670d6', // 亮紫
+    '96': '#29b8db', // 亮青
+    '97': '#ffffff'  // 亮白
+};
+
+// 解析ANSI颜色代码
+function parseAnsiColor(text) {
+    const regex = /\u001b\[(\d+)m(.*?)(?=\u001b|\n|$)/g;
+    let result = text;
+    let match;
+    
+    while ((match = regex.exec(text)) !== null) {
+        const [fullMatch, colorCode, content] = match;
+        const color = ANSI_COLORS[colorCode] || '#d4d4d4';
+        result = result.replace(fullMatch, `<span style="color: ${color}">${content}</span>`);
+    }
+    
+    return result.replace(/\u001b\[\d+m/g, '');
+}
+
 // 在页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     messagesContainer = document.querySelector('.messages-container');
@@ -50,7 +85,8 @@ function refreshMessages() {
             if (msg.addr === "系统") {
                 div.className = "system-message";
             }
-            div.innerHTML = msg.data;
+            // 使用ANSI颜色解析
+            div.innerHTML = parseAnsiColor(msg.data);
             messagesDiv.appendChild(div);
         }
     });
@@ -183,7 +219,8 @@ ws.onmessage = function(event) {
                 div.className = "system-message";
             }
             
-            div.innerHTML = data.data;
+            // 使用ANSI颜色解析
+            div.innerHTML = parseAnsiColor(data.data);
             messages.appendChild(div);
             scrollToBottom();
         }

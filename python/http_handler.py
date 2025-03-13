@@ -100,6 +100,8 @@ class LogHandler(SimpleHTTPRequestHandler):
         try:
             # 确定目标目录
             target_dir = os.path.join(LOG_DIR, 'default' if sn == 'default' else sn)
+            logger.info(f"正在搜索日志目录: {target_dir}")
+            
             if not os.path.exists(target_dir):
                 logger.warning(f"目录不存在: {target_dir}")
                 return date_list
@@ -110,10 +112,11 @@ class LogHandler(SimpleHTTPRequestHandler):
                     # 文件名就是日期
                     date = filename[:-4]  # 移除.log后缀
                     date_list.append(date)
+                    logger.info(f"找到日志文件: {filename}")
             
             # 按日期倒序排序，最新的在前
             date_list.sort(reverse=True)
-            logger.info(f"在 {target_dir} 中找到 {len(date_list)} 个日志文件")
+            logger.info(f"在 {target_dir} 中找到 {len(date_list)} 个日志文件: {date_list}")
         except Exception as e:
             logger.error(f"获取日期列表失败: {str(e)}")
         return date_list
@@ -123,6 +126,8 @@ class LogHandler(SimpleHTTPRequestHandler):
         # 构建完整的日志文件路径
         full_path = os.path.join(LOG_DIR, log_path)
         full_path = os.path.normpath(full_path)  # 规范化路径
+        
+        logger.info(f"请求查看日志文件: {full_path}")
         
         # 安全检查：确保路径在LOG_DIR内
         if not full_path.startswith(os.path.abspath(LOG_DIR)):
@@ -143,6 +148,7 @@ class LogHandler(SimpleHTTPRequestHandler):
 
             # 获取文件大小
             file_size = os.path.getsize(full_path)
+            logger.info(f"日志文件大小: {file_size} bytes")
             
             # 发送响应头
             self.send_response(200)
@@ -154,12 +160,10 @@ class LogHandler(SimpleHTTPRequestHandler):
 
             # 读取并发送文件内容
             with open(full_path, 'rb') as f:
-                chunk_size = 8192
-                while True:
-                    chunk = f.read(chunk_size)
-                    if not chunk:
-                        break
-                    self.wfile.write(chunk)
+                content = f.read()
+                logger.info(f"成功读取日志内容，长度: {len(content)} bytes")
+                self.wfile.write(content)
+                logger.info("成功发送日志内容")
                     
         except Exception as e:
             logger.error(f"读取日志内容失败 {full_path}: {str(e)}")
