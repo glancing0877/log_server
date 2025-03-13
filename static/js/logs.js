@@ -49,9 +49,12 @@ function fetchDateList() {
             
             // 默认选择最新的日期
             if (dates.length > 0) {
-                dateSelect.value = dates[0];
                 currentDate = dates[0];
-                fetchLogContent();
+                dateSelect.value = currentDate;
+                // 使用setTimeout确保DOM更新后再获取日志内容
+                setTimeout(() => {
+                    fetchLogContent();
+                }, 100);
             }
         })
         .catch(error => {
@@ -73,11 +76,16 @@ function handleDateChange() {
 }
 
 function fetchLogContent() {
-    if (!currentDate) return;
+    if (!currentDate) {
+        console.warn('没有选择日期，跳过获取日志内容');
+        return;
+    }
     
     const path = currentSN === 'default' 
         ? `default/${currentDate}.log`
         : `${currentSN}/${currentDate}.log`;
+    
+    console.log('正在获取日志内容:', path);
         
     fetch(`/api/logs/content/${path}`)
         .then(response => {
@@ -87,6 +95,7 @@ function fetchLogContent() {
             return response.text();
         })
         .then(content => {
+            console.log('成功获取日志内容，长度:', content.length);
             displayLogContent(content);
         })
         .catch(error => {
