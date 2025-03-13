@@ -36,10 +36,29 @@ function fetchSNList() {
 function fetchDateList() {
     console.log('开始获取日期列表，当前SN:', currentSN);
     fetch(`/api/logs/date-list/${currentSN}`)
-        .then(response => response.json())
+        .then(response => {
+            console.log('日期列表响应状态:', response.status);
+            if (!response.ok) {
+                throw new Error(`获取日期列表失败: HTTP ${response.status}`);
+            }
+            return response.json().catch(error => {
+                console.error('解析日期列表JSON失败:', error);
+                throw new Error('解析日期列表JSON失败');
+            });
+        })
         .then(dates => {
             console.log('获取到日期列表:', dates);
+            if (!Array.isArray(dates)) {
+                console.error('日期列表格式错误:', dates);
+                throw new Error('日期列表格式错误');
+            }
+            
             const dateSelect = document.getElementById('date-select');
+            if (!dateSelect) {
+                console.error('找不到日期选择器元素');
+                throw new Error('找不到日期选择器元素');
+            }
+            
             dateSelect.innerHTML = '';
             
             dates.forEach(date => {
@@ -60,10 +79,22 @@ function fetchDateList() {
                 }, 100);
             } else {
                 console.warn('没有找到任何日期');
+                const container = document.querySelector('.log-lines-container');
+                if (container) {
+                    container.innerHTML = '<div class="error-message">当前设备没有可用的日志</div>';
+                }
             }
         })
         .catch(error => {
             console.error('获取日期列表失败:', error);
+            const dateSelect = document.getElementById('date-select');
+            if (dateSelect) {
+                dateSelect.innerHTML = '<option value="">加载失败</option>';
+            }
+            const container = document.querySelector('.log-lines-container');
+            if (container) {
+                container.innerHTML = `<div class="error-message">获取日期列表失败: ${error.message}</div>`;
+            }
         });
 }
 
