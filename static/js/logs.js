@@ -38,58 +38,56 @@ function fetchDateList() {
     fetch(`/api/logs/date-list/${currentSN}`)
         .then(response => {
             console.log('日期列表响应状态:', response.status);
-            // 克隆响应以便我们可以同时读取文本和JSON
-            return response.text().then(text => {
-                console.log('日期列表原始响应:', text);
-                try {
-                    const data = JSON.parse(text);
-                    console.log('解析后的日期列表:', data);
-                    if (!response.ok) {
-                        throw new Error(`获取日期列表失败: HTTP ${response.status}`);
-                    }
-                    return data;
-                } catch (e) {
-                    console.error('JSON解析失败:', e);
-                    throw new Error('解析日期列表JSON失败');
-                }
-            });
+            if (!response.ok) {
+                throw new Error(`获取日期列表失败: HTTP ${response.status}`);
+            }
+            return response.text();
         })
-        .then(dates => {
-            if (!Array.isArray(dates)) {
-                console.error('日期列表格式错误，期望数组但收到:', typeof dates, dates);
-                throw new Error('日期列表格式错误');
-            }
-            
-            const dateSelect = document.getElementById('date-select');
-            if (!dateSelect) {
-                console.error('找不到日期选择器元素');
-                throw new Error('找不到日期选择器元素');
-            }
-            
-            dateSelect.innerHTML = '';
-            
-            dates.forEach(date => {
-                const option = document.createElement('option');
-                option.value = date;
-                option.textContent = date;
-                dateSelect.appendChild(option);
-            });
-            
-            // 默认选择最新的日期
-            if (dates.length > 0) {
-                currentDate = dates[0];
-                dateSelect.value = currentDate;
-                console.log('设置当前日期为:', currentDate);
-                // 使用setTimeout确保DOM更新后再获取日志内容
-                setTimeout(() => {
-                    fetchLogContent();
-                }, 100);
-            } else {
-                console.warn('没有找到任何日期');
-                const container = document.querySelector('.log-lines-container');
-                if (container) {
-                    container.innerHTML = '<div class="error-message">当前设备没有可用的日志</div>';
+        .then(text => {
+            console.log('日期列表原始响应:', text);
+            try {
+                const dates = JSON.parse(text);
+                console.log('解析后的日期列表:', dates);
+                
+                if (!Array.isArray(dates)) {
+                    console.error('日期列表格式错误，期望数组但收到:', typeof dates, dates);
+                    throw new Error('日期列表格式错误');
                 }
+                
+                const dateSelect = document.getElementById('date-select');
+                if (!dateSelect) {
+                    console.error('找不到日期选择器元素');
+                    throw new Error('找不到日期选择器元素');
+                }
+                
+                dateSelect.innerHTML = '';
+                
+                dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    dateSelect.appendChild(option);
+                });
+                
+                // 默认选择最新的日期
+                if (dates.length > 0) {
+                    currentDate = dates[0];
+                    dateSelect.value = currentDate;
+                    console.log('设置当前日期为:', currentDate);
+                    // 使用setTimeout确保DOM更新后再获取日志内容
+                    setTimeout(() => {
+                        fetchLogContent();
+                    }, 100);
+                } else {
+                    console.warn('没有找到任何日期');
+                    const container = document.querySelector('.log-lines-container');
+                    if (container) {
+                        container.innerHTML = '<div class="error-message">当前设备没有可用的日志</div>';
+                    }
+                }
+            } catch (e) {
+                console.error('JSON解析失败:', e);
+                throw new Error('解析日期列表JSON失败');
             }
         })
         .catch(error => {
