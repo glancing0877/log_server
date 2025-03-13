@@ -201,16 +201,18 @@ function fetchLogContent() {
         })
         .catch(error => {
             console.error('获取日志内容失败:', error);
-            const container = document.querySelector('.log-lines-container');
-            container.innerHTML = '<div class="error-message">获取日志内容失败，请重试</div>';
+            const container = document.getElementById('log-lines-container');
+            if (container) {
+                container.innerHTML = '<div class="error-message">获取日志内容失败，请重试</div>';
+            }
         });
 }
 
 function displayLogContent(content) {
     console.log('开始处理日志内容');
-    const container = document.querySelector('.log-lines-container');
+    const container = document.getElementById('log-lines-container');
     if (!container) {
-        console.error('找不到日志容器元素 .log-lines-container');
+        console.error('找不到日志容器元素 #log-lines-container');
         return;
     }
     
