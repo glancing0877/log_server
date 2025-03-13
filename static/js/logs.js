@@ -31,21 +31,22 @@ function fetchSNList() {
             if (!response.ok) {
                 throw new Error(`获取SN列表失败: HTTP ${response.status}`);
             }
-            return response.text().then(text => {
-                console.log('SN列表原始响应:', text);
-                if (!text.trim()) {
-                    console.error('SN列表响应为空');
-                    throw new Error('SN列表响应为空');
-                }
-                try {
-                    const data = JSON.parse(text);
-                    console.log('解析后的SN列表数据:', data);
-                    return data;
-                } catch (e) {
-                    console.error('SN列表JSON解析失败:', e);
-                    throw new Error('SN列表JSON解析失败');
-                }
-            });
+            return response.text();
+        })
+        .then(text => {
+            console.log('SN列表原始响应:', text);
+            if (!text.trim()) {
+                console.error('SN列表响应为空');
+                throw new Error('SN列表响应为空');
+            }
+            try {
+                const data = JSON.parse(text);
+                console.log('解析后的SN列表数据:', data);
+                return data;
+            } catch (e) {
+                console.error('SN列表JSON解析失败:', e);
+                throw new Error('SN列表JSON解析失败');
+            }
         })
         .then(snList => {
             console.log('获取到的SN列表:', snList);
@@ -60,7 +61,7 @@ function fetchSNList() {
                 return;
             }
             
-            // 保留默认选项
+            // 保留默认选项并清空其他选项
             snSelect.innerHTML = '<option value="default">全局日志</option>';
             
             if (snList.length === 0) {
@@ -68,7 +69,9 @@ function fetchSNList() {
                 return;
             }
             
+            // 添加新的选项
             snList.forEach(sn => {
+                console.log('添加SN选项:', sn);
                 const option = document.createElement('option');
                 option.value = sn;
                 option.textContent = `设备 ${sn}`;
@@ -77,9 +80,8 @@ function fetchSNList() {
             
             console.log('SN列表更新完成，选项数量:', snSelect.options.length);
             
-            // 触发change事件以更新日期列表
-            const event = new Event('change');
-            snSelect.dispatchEvent(event);
+            // 手动触发一次日期列表获取
+            fetchDateList();
         })
         .catch(error => {
             console.error('获取SN列表失败:', error);
@@ -102,21 +104,22 @@ function fetchDateList() {
             if (!response.ok) {
                 throw new Error(`获取日期列表失败: HTTP ${response.status}`);
             }
-            return response.text().then(text => {
-                console.log('日期列表原始响应:', text);
-                if (!text.trim()) {
-                    console.error('日期列表响应为空');
-                    throw new Error('日期列表响应为空');
-                }
-                try {
-                    const data = JSON.parse(text);
-                    console.log('解析后的日期列表数据:', data);
-                    return data;
-                } catch (e) {
-                    console.error('日期列表JSON解析失败:', e);
-                    throw new Error('日期列表JSON解析失败');
-                }
-            });
+            return response.text();
+        })
+        .then(text => {
+            console.log('日期列表原始响应:', text);
+            if (!text.trim()) {
+                console.error('日期列表响应为空');
+                throw new Error('日期列表响应为空');
+            }
+            try {
+                const data = JSON.parse(text);
+                console.log('解析后的日期列表数据:', data);
+                return data;
+            } catch (e) {
+                console.error('日期列表JSON解析失败:', e);
+                throw new Error('日期列表JSON解析失败');
+            }
         })
         .then(dates => {
             console.log('获取到的日期列表:', dates);
@@ -131,6 +134,7 @@ function fetchDateList() {
                 throw new Error('找不到日期选择器元素');
             }
             
+            // 清空现有选项
             dateSelect.innerHTML = '';
             
             if (dates.length === 0) {
@@ -143,7 +147,9 @@ function fetchDateList() {
                 return;
             }
             
+            // 添加新的日期选项
             dates.forEach(date => {
+                console.log('添加日期选项:', date);
                 const option = document.createElement('option');
                 option.value = date;
                 option.textContent = date;
@@ -152,13 +158,13 @@ function fetchDateList() {
             
             console.log('日期列表更新完成，选项数量:', dateSelect.options.length);
             
-            // 默认选择最新的日期
-            if (dates.length > 0) {
-                currentDate = dates[0];
-                dateSelect.value = currentDate;
-                console.log('设置当前日期为:', currentDate);
-                fetchLogContent();
-            }
+            // 默认选择第一个日期并加载内容
+            currentDate = dates[0];
+            dateSelect.value = currentDate;
+            console.log('设置当前日期为:', currentDate);
+            
+            // 获取日志内容
+            fetchLogContent();
         })
         .catch(error => {
             console.error('获取日期列表失败:', error);
