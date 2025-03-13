@@ -38,18 +38,25 @@ function fetchDateList() {
     fetch(`/api/logs/date-list/${currentSN}`)
         .then(response => {
             console.log('日期列表响应状态:', response.status);
-            if (!response.ok) {
-                throw new Error(`获取日期列表失败: HTTP ${response.status}`);
-            }
-            return response.json().catch(error => {
-                console.error('解析日期列表JSON失败:', error);
-                throw new Error('解析日期列表JSON失败');
+            // 克隆响应以便我们可以同时读取文本和JSON
+            return response.text().then(text => {
+                console.log('日期列表原始响应:', text);
+                try {
+                    const data = JSON.parse(text);
+                    console.log('解析后的日期列表:', data);
+                    if (!response.ok) {
+                        throw new Error(`获取日期列表失败: HTTP ${response.status}`);
+                    }
+                    return data;
+                } catch (e) {
+                    console.error('JSON解析失败:', e);
+                    throw new Error('解析日期列表JSON失败');
+                }
             });
         })
         .then(dates => {
-            console.log('获取到日期列表:', dates);
             if (!Array.isArray(dates)) {
-                console.error('日期列表格式错误:', dates);
+                console.error('日期列表格式错误，期望数组但收到:', typeof dates, dates);
                 throw new Error('日期列表格式错误');
             }
             
