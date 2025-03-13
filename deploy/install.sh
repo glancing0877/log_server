@@ -9,10 +9,7 @@ fi
 
 echo "开始安装日志服务器..."
 
-# 安装依赖
-echo "正在安装系统依赖..."
-apt-get update
-apt-get install -y python3 python3-pip
+
 
 # 创建服务用户
 echo "正在创建服务用户..."
