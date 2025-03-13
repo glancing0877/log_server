@@ -171,3 +171,20 @@
 2025-03-13 10:48:56,185 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:56] [SF1PRO123456789122345]: 124214\r\n"}[0m
 2025-03-13 10:48:57,291 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:57] \u5ba2\u6237\u7aef\u65ad\u5f00\u8fde\u63a5: 127.0.0.1,52485"}[0m
 2025-03-13 10:48:57,293 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345"]}[0m
+2025-03-13 11:37:58,523 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 11:37:58,525 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 11:37:58,539 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 11:37:58,577 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 11:38:03,893 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 11:38:03,949 - INFO - [MainThread] - [92m收到WebSocket消息: {'type': 'init', 'message': 'request_current_state'}[0m
+2025-03-13 11:38:03,951 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 11:38:05,097 - INFO - [Thread-3] - [92m找到 2 个SN目录[0m
+2025-03-13 11:38:05,099 - INFO - [Thread-3] - [92m正在搜索日志目录: C:\Users\danghb\Desktop\html\python\logs\default[0m
+2025-03-13 11:38:05,102 - ERROR - [MainThread] - [91mWebSocket错误: received 1001 (going away); then sent 1001 (going away)[0m
+2025-03-13 11:38:05,103 - INFO - [Thread-3] - [92m找到日志文件: 2025-03-13.log[0m
+2025-03-13 11:38:05,103 - INFO - [MainThread] - [92mWebSocket客户端断开连接[0m
+2025-03-13 11:38:05,104 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件: ['2025-03-13'][0m
+2025-03-13 11:38:05,240 - INFO - [Thread-3] - [92m请求查看日志文件: C:\Users\danghb\Desktop\html\python\logs\default\2025-03-13.log[0m
+2025-03-13 11:38:05,241 - INFO - [Thread-3] - [92m日志文件大小: 27155 bytes[0m
+2025-03-13 11:38:05,254 - INFO - [Thread-3] - [92m成功读取日志内容，长度: 27243 bytes[0m
+2025-03-13 11:38:05,255 - INFO - [Thread-3] - [92m成功发送日志内容[0m

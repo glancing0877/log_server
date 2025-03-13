@@ -14,10 +14,19 @@ function initializePage() {
 }
 
 function fetchSNList() {
+    console.log('开始获取SN列表');
     fetch('/api/logs/sn-list')
-        .then(response => response.json())
+        .then(response => {
+            console.log('SN列表响应状态:', response.status);
+            return response.json();
+        })
         .then(snList => {
+            console.log('获取到的SN列表:', snList);
             const snSelect = document.getElementById('sn-select');
+            if (!snSelect) {
+                console.error('找不到SN选择器元素');
+                return;
+            }
             // 保留默认选项
             snSelect.innerHTML = '<option value="default">全局日志</option>';
             
@@ -27,17 +36,26 @@ function fetchSNList() {
                 option.textContent = `设备 ${sn}`;
                 snSelect.appendChild(option);
             });
+            console.log('SN列表更新完成');
         })
         .catch(error => {
             console.error('获取SN列表失败:', error);
+            const snSelect = document.getElementById('sn-select');
+            if (snSelect) {
+                snSelect.innerHTML = '<option value="default">加载失败</option>';
+            }
         });
 }
 
 function fetchDateList() {
     console.log('开始获取日期列表，当前SN:', currentSN);
-    fetch(`/api/logs/date-list/${currentSN}`)
+    const url = `/api/logs/date-list/${currentSN}`;
+    console.log('请求URL:', url);
+    
+    fetch(url)
         .then(response => {
             console.log('日期列表响应状态:', response.status);
+            console.log('响应头:', Object.fromEntries(response.headers.entries()));
             if (!response.ok) {
                 throw new Error(`获取日期列表失败: HTTP ${response.status}`);
             }
@@ -62,6 +80,12 @@ function fetchDateList() {
                 
                 dateSelect.innerHTML = '';
                 
+                if (dates.length === 0) {
+                    console.log('日期列表为空');
+                    dateSelect.innerHTML = '<option value="">无可用日期</option>';
+                    return;
+                }
+                
                 dates.forEach(date => {
                     const option = document.createElement('option');
                     option.value = date;
@@ -74,16 +98,7 @@ function fetchDateList() {
                     currentDate = dates[0];
                     dateSelect.value = currentDate;
                     console.log('设置当前日期为:', currentDate);
-                    // 使用setTimeout确保DOM更新后再获取日志内容
-                    setTimeout(() => {
-                        fetchLogContent();
-                    }, 100);
-                } else {
-                    console.warn('没有找到任何日期');
-                    const container = document.querySelector('.log-lines-container');
-                    if (container) {
-                        container.innerHTML = '<div class="error-message">当前设备没有可用的日志</div>';
-                    }
+                    fetchLogContent();
                 }
             } catch (e) {
                 console.error('JSON解析失败:', e);
