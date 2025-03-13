@@ -1,5 +1,5 @@
 // 服务器配置
-const SERVER_HOST = 'localhost';
+const SERVER_HOST = window.location.hostname;  // 使用当前域名
 const SERVER_PORT = 8080;
 const WS_PORT = 8765;
 const SERVER_URL = `http://${SERVER_HOST}:${SERVER_PORT}`;
