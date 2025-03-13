@@ -1,0 +1,173 @@
+2025-03-13 09:49:14,133 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 09:49:14,136 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 09:49:14,155 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 09:49:14,201 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 09:49:16,866 - INFO - [Thread-3] - [92m正在搜索日志目录: C:\Users\danghb\Desktop\html\python\logs[0m
+2025-03-13 09:49:16,867 - INFO - [Thread-3] - [92m共找到 1 个日志文件[0m
+2025-03-13 09:49:20,840 - INFO - [Thread-3] - [92m尝试访问日志文件: C:\Users\danghb\Desktop\html\python\logs\tcp_server.log[0m
+2025-03-13 09:49:20,841 - INFO - [Thread-3] - [92m日志文件大小: 31338 bytes[0m
+2025-03-13 09:49:21,031 - INFO - [Thread-3] - [92m正在搜索日志目录: C:\Users\danghb\Desktop\html\python\logs[0m
+2025-03-13 09:49:21,032 - INFO - [Thread-3] - [92m共找到 1 个日志文件[0m
+2025-03-13 09:49:22,025 - INFO - [Thread-3] - [92m尝试访问日志文件: C:\Users\danghb\Desktop\html\python\logs\tcp_server.log[0m
+2025-03-13 09:49:22,026 - INFO - [Thread-3] - [92m日志文件大小: 31338 bytes[0m
+2025-03-13 09:51:54,009 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 09:51:54,011 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 09:51:54,027 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 09:51:54,064 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 09:51:59,427 - ERROR - [Thread-3] - [91m处理HTTP请求出错: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。[0m
+2025-03-13 09:52:08,539 - INFO - [Thread-3] - [92m尝试访问日志文件: C:\Users\danghb\Desktop\html\python\logs\SF1PRO12345678912345\2025-03-13.log[0m
+2025-03-13 09:52:08,540 - INFO - [Thread-3] - [92m日志文件大小: 912 bytes[0m
+2025-03-13 09:52:21,632 - INFO - [Thread-3] - [92m尝试访问日志文件: C:\Users\danghb\Desktop\html\python\logs\default\2025-03-13.log[0m
+2025-03-13 09:52:21,632 - INFO - [Thread-3] - [92m日志文件大小: 2160 bytes[0m
+2025-03-13 09:55:04,289 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 09:55:04,293 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 09:55:04,308 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 09:55:04,348 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 09:55:05,825 - INFO - [Thread-3] - [92m正在搜索日志目录: C:\Users\danghb\Desktop\html\python\logs[0m
+2025-03-13 09:55:05,828 - INFO - [Thread-3] - [92m完成日志目录扫描[0m
+2025-03-13 09:55:10,359 - INFO - [Thread-3] - [92m尝试访问日志文件: C:\Users\danghb\Desktop\html\python\logs\SF1PRO12345678912345\2025-03-13.log[0m
+2025-03-13 09:55:10,360 - INFO - [Thread-3] - [92m日志文件大小: 912 bytes[0m
+2025-03-13 09:55:13,272 - INFO - [Thread-3] - [92m尝试访问日志文件: C:\Users\danghb\Desktop\html\python\logs\default\2025-03-13.log[0m
+2025-03-13 09:55:13,273 - INFO - [Thread-3] - [92m日志文件大小: 3214 bytes[0m
+2025-03-13 09:55:16,287 - INFO - [Thread-3] - [92m尝试访问日志文件: C:\Users\danghb\Desktop\html\python\logs\tcp_server.log[0m
+2025-03-13 09:55:16,288 - INFO - [Thread-3] - [92m日志文件大小: 31338 bytes[0m
+2025-03-13 09:55:53,561 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 09:55:53,563 - INFO - [MainThread] - [92m收到WebSocket消息: {'type': 'init', 'message': 'request_current_state'}[0m
+2025-03-13 09:55:53,564 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 09:55:54,335 - ERROR - [MainThread] - [91mWebSocket错误: received 1001 (going away); then sent 1001 (going away)[0m
+2025-03-13 09:55:54,336 - INFO - [MainThread] - [92mWebSocket客户端断开连接[0m
+2025-03-13 09:58:15,075 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 09:58:15,078 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 09:58:15,096 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 09:58:15,139 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 10:00:54,005 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 10:00:54,011 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 10:00:54,033 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 10:00:54,092 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 10:01:48,511 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 10:01:48,513 - INFO - [MainThread] - [92m收到WebSocket消息: {'type': 'init', 'message': 'request_current_state'}[0m
+2025-03-13 10:01:48,514 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 10:40:47,251 - INFO - [Thread-4] - [92m新的TCP客户端连接: 127.0.0.1,51452[0m
+2025-03-13 10:40:47,253 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:40:47] \u65b0\u5ba2\u6237\u7aef\u8fde\u63a5: 127.0.0.1,51452"}[0m
+2025-03-13 10:40:47,254 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["127.0.0.1,51452"]}[0m
+2025-03-13 10:41:02,892 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 10:41:02,895 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 10:41:02,913 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 10:41:02,992 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 10:41:03,291 - INFO - [Thread-4] - [92m新的TCP客户端连接: 127.0.0.1,51479[0m
+2025-03-13 10:41:08,372 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:41:08,376 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:41:12,632 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\SF1PRO12345678912345 中找到 1 个日志文件[0m
+2025-03-13 10:41:16,622 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:41:21,713 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\SF1PRO12345678912345 中找到 1 个日志文件[0m
+2025-03-13 10:44:07,173 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:44:07,176 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:44:11,884 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:44:11,886 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:44:51,988 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["127.0.0.1,51479"]}[0m
+2025-03-13 10:44:51,992 - INFO - [MainThread] - [92m收到WebSocket消息: {'type': 'init', 'message': 'request_current_state'}[0m
+2025-03-13 10:44:51,993 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["127.0.0.1,51479"]}[0m
+2025-03-13 10:44:52,655 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:44:52,659 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:44:52,672 - ERROR - [MainThread] - [91mWebSocket错误: received 1001 (going away); then sent 1001 (going away)[0m
+2025-03-13 10:44:52,672 - INFO - [MainThread] - [92mWebSocket客户端断开连接[0m
+2025-03-13 10:45:04,832 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:45:04,835 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:45:17,526 - INFO - [MainThread] - [92m服务器启动...[0m
+2025-03-13 10:45:17,528 - INFO - [Thread-2] - [92mTCP服务器启动在 0.0.0.0:45860[0m
+2025-03-13 10:45:17,545 - INFO - [Thread-3] - [92mHTTP服务器启动在 http://0.0.0.0:8080[0m
+2025-03-13 10:45:17,587 - INFO - [MainThread] - [92mWebSocket服务器启动在 ws://0.0.0.0:8765[0m
+2025-03-13 10:45:18,580 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:45:18,582 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:45:19,340 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:45:19,342 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:45:19,937 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:45:19,939 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:46:12,571 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:46:12,579 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:46:59,110 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:46:59,112 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:47:51,195 - INFO - [Thread-3] - [92m找到 1 个SN目录[0m
+2025-03-13 10:47:51,196 - INFO - [Thread-3] - [92m在 C:\Users\danghb\Desktop\html\python\logs\default 中找到 1 个日志文件[0m
+2025-03-13 10:48:01,469 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 10:48:01,471 - INFO - [MainThread] - [92m收到WebSocket消息: {'type': 'init', 'message': 'request_current_state'}[0m
+2025-03-13 10:48:01,473 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": []}[0m
+2025-03-13 10:48:04,359 - INFO - [Thread-4] - [92m新的TCP客户端连接: 127.0.0.1,52396[0m
+2025-03-13 10:48:04,361 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:04] \u65b0\u5ba2\u6237\u7aef\u8fde\u63a5: 127.0.0.1,52396"}[0m
+2025-03-13 10:48:04,361 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["127.0.0.1,52396"]}[0m
+2025-03-13 10:48:04,941 - INFO - [Thread-4] - [92m解析到客户端信息 - Wifi: klm-rdtest, SN: SF1PRO12345678912345[0m
+2025-03-13 10:48:04,943 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:04] \u8bc6\u522b\u5230\u8bbe\u5907\u4fe1\u606f - Wifi: klm-rdtest, SN: SF1PRO12345678912345"}[0m
+2025-03-13 10:48:04,943 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345"]}[0m
+2025-03-13 10:48:05,141 - INFO - [Thread-4] - [92m解析到客户端信息 - Wifi: klm-rdtest, SN: SF1PRO12345678912345[0m
+2025-03-13 10:48:05,142 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:05] \u8bc6\u522b\u5230\u8bbe\u5907\u4fe1\u606f - Wifi: klm-rdtest, SN: SF1PRO12345678912345"}[0m
+2025-03-13 10:48:05,143 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345"]}[0m
+2025-03-13 10:48:05,301 - INFO - [Thread-4] - [92m解析到客户端信息 - Wifi: klm-rdtest, SN: SF1PRO12345678912345[0m
+2025-03-13 10:48:05,302 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:05] \u8bc6\u522b\u5230\u8bbe\u5907\u4fe1\u606f - Wifi: klm-rdtest, SN: SF1PRO12345678912345"}[0m
+2025-03-13 10:48:05,302 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345"]}[0m
+2025-03-13 10:48:05,457 - INFO - [Thread-4] - [92m解析到客户端信息 - Wifi: klm-rdtest, SN: SF1PRO12345678912345[0m
+2025-03-13 10:48:05,459 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:05] \u8bc6\u522b\u5230\u8bbe\u5907\u4fe1\u606f - Wifi: klm-rdtest, SN: SF1PRO12345678912345"}[0m
+2025-03-13 10:48:05,459 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345"]}[0m
+2025-03-13 10:48:05,601 - INFO - [Thread-4] - [92m解析到客户端信息 - Wifi: klm-rdtest, SN: SF1PRO12345678912345[0m
+2025-03-13 10:48:05,602 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:05] \u8bc6\u522b\u5230\u8bbe\u5907\u4fe1\u606f - Wifi: klm-rdtest, SN: SF1PRO12345678912345"}[0m
+2025-03-13 10:48:05,603 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345"]}[0m
+2025-03-13 10:48:08,543 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:08] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:08,719 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:08] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:08,866 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:08] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:09,034 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:09] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:09,211 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:09] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:09,430 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:09] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:09,662 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:09] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:09,847 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:09] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:11,927 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:11] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:12,078 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:12] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:12,218 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:12] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:12,370 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:12] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:12,522 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:12] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:12,678 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:12] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:12,810 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:12] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:14,234 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:14] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:14,394 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:14] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:14,554 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:14] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:14,710 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:14] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:14,859 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:14] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:16,283 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:16] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:16,450 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:16] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:16,602 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:16] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:16,735 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:16] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:18,474 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:18] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:18,635 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:18] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:18,831 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:18] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:19,011 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:19] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:19,170 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:19] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:19,334 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:19] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:19,482 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:19] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:19,631 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:19] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:19,778 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:19] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:19,974 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO12345678912345", "data": "[2025-03-13 10:48:19] [SF1PRO12345678912345]: 124\r\n"}[0m
+2025-03-13 10:48:42,808 - INFO - [Thread-5] - [92m新的TCP客户端连接: 127.0.0.1,52485[0m
+2025-03-13 10:48:42,809 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:42] \u65b0\u5ba2\u6237\u7aef\u8fde\u63a5: 127.0.0.1,52485"}[0m
+2025-03-13 10:48:42,810 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345", "127.0.0.1,52485"]}[0m
+2025-03-13 10:48:45,817 - INFO - [Thread-5] - [92m解析到客户端信息 - Wifi: klm-rdtest, SN: SF1PRO123456789122345[0m
+2025-03-13 10:48:45,820 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:45] \u8bc6\u522b\u5230\u8bbe\u5907\u4fe1\u606f - Wifi: klm-rdtest, SN: SF1PRO123456789122345"}[0m
+2025-03-13 10:48:45,821 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345", "SF1PRO123456789122345"]}[0m
+2025-03-13 10:48:50,679 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:50] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:50,871 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:50] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:51,030 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:51] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:51,182 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:51] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:51,331 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:51] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:51,470 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:51] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:51,630 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:51] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:51,786 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:51] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:51,926 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:51] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:54,598 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:54] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:54,757 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:54] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:54,951 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:54] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:55,130 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:55] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:55,327 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:55] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:55,534 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:55] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:55,726 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:55] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:55,900 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:55] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:56,047 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:56] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:56,185 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "SF1PRO123456789122345", "data": "[2025-03-13 10:48:56] [SF1PRO123456789122345]: 124214\r\n"}[0m
+2025-03-13 10:48:57,291 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "message", "addr": "\u7cfb\u7edf", "data": "[2025-03-13 10:48:57] \u5ba2\u6237\u7aef\u65ad\u5f00\u8fde\u63a5: 127.0.0.1,52485"}[0m
+2025-03-13 10:48:57,293 - INFO - [MainThread] - [92m通知所有Web客户端: {"type": "client_update", "clients": ["SF1PRO12345678912345"]}[0m

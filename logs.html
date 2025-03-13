@@ -15,8 +15,29 @@
                 <a href="index.html" class="back-button">返回监控页面</a>
             </div>
         </div>
-        <div class="logs-list">
-            <!-- 日志列表将通过JavaScript动态填充 -->
+        
+        <div class="log-filters">
+            <div class="filter-group">
+                <label for="sn-select">设备选择：</label>
+                <select id="sn-select" onchange="handleSNChange()">
+                    <option value="default">全局日志</option>
+                    <!-- SN列表将通过JavaScript动态填充 -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="date-select">日期选择：</label>
+                <select id="date-select" onchange="handleDateChange()">
+                    <!-- 日期列表将通过JavaScript动态填充 -->
+                </select>
+            </div>
+        </div>
+
+        <div class="logs-content">
+            <div class="log-viewer">
+                <div class="log-lines-container">
+                    <!-- 日志内容将通过JavaScript动态填充 -->
+                </div>
+            </div>
         </div>
     </div>
     <script src="static/js/logs.js"></script>

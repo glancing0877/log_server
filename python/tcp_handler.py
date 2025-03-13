@@ -2,7 +2,7 @@ import socket
 import threading
 from datetime import datetime
 from queue import Queue
-from logger_config import logger
+from logger_config import logger, sn_logger
 
 class TCPClient:
     def __init__(self, conn, addr_str):
@@ -12,13 +12,17 @@ class TCPClient:
         self.sn = None
         self.display_name = addr_str
         self.is_alive = True
+        self._logger = logger  # 默认使用通用logger
 
     def update_info(self, wifi_name, sn):
         """更新客户端信息"""
         self.wifi_name = wifi_name
         self.sn = sn
         self.display_name = f"{sn}" if sn else self.addr_str
-        logger.info(f"客户端信息已更新: {self.display_name}")
+        # 更新logger为SN专用logger
+        if sn:
+            self._logger = sn_logger.get_logger(sn)
+        self._logger.info(f"客户端信息已更新: {self.display_name}")
 
     def close(self):
         """安全关闭连接"""
@@ -28,6 +32,15 @@ class TCPClient:
             pass
         finally:
             self.is_alive = False
+
+    def log(self, level, message):
+        """统一的日志记录方法"""
+        if level == 'info':
+            self._logger.info(message)
+        elif level == 'error':
+            self._logger.error(message)
+        elif level == 'warning':
+            self._logger.warning(message)
 
 def addr_to_str(addr):
     """将地址元组转换为字符串"""
@@ -77,7 +90,7 @@ class TCPServer:
         client = TCPClient(conn, addr_str)
         self.tcp_clients[addr_str] = client
         current_time = get_current_time()
-        logger.info(f"新的TCP客户端连接: {addr_str}")
+        client.log('info', f"新的TCP客户端连接: {addr_str}")
         
         # 发送连接通知
         self.message_queue.put({
@@ -117,18 +130,18 @@ class TCPServer:
                         "data": format_message(client.display_name, decoded_data, current_time)
                     }
                     self.message_queue.put(msg)
-                    logger.info(f"收到TCP客户端 {client.display_name} 消息: {decoded_data}")
+                    client.log('info', f"收到TCP客户端 {client.display_name} 消息: {decoded_data}")
                 except socket.timeout:
                     continue
                 except Exception as e:
-                    logger.error(f"接收TCP客户端 {client.display_name} 数据时出错: {str(e)}")
+                    client.log('error', f"接收TCP客户端 {client.display_name} 数据时出错: {str(e)}")
                     break
         finally:
             client.close()
             if addr_str in self.tcp_clients:
                 current_time = get_current_time()
                 del self.tcp_clients[addr_str]
-                logger.info(f"TCP客户端断开连接: {addr_str}")
+                client.log('info', f"TCP客户端断开连接: {addr_str}")
                 # 发送断开连接通知
                 self.message_queue.put({
                     "type": "message",

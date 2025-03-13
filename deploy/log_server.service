@@ -1,0 +1,16 @@
+[Unit]
+Description=Log Server Service
+After=network.target
+
+[Service]
+Type=simple
+User=logserver
+Group=logserver
+WorkingDirectory=/opt/log_server
+Environment=PYTHONPATH=/opt/log_server
+ExecStart=/usr/bin/python3 python/main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target 

@@ -1,53 +1,129 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 获取日志列表
-    fetchLogs();
-
-    // 为返回按钮添加事件监听
-    const backButton = document.querySelector('.back-button');
-    if (backButton) {
-        backButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.location.href = '/';
-        });
-    }
+    // 初始化页面
+    initializePage();
 });
 
-function fetchLogs() {
-    fetch('/api/logs')
+let currentSN = 'default';
+let currentDate = null;
+
+function initializePage() {
+    // 获取可用的SN列表
+    fetchSNList();
+    // 获取当前选择的SN的日期列表
+    fetchDateList();
+}
+
+function fetchSNList() {
+    fetch('/api/logs/sn-list')
         .then(response => response.json())
-        .then(logs => {
-            const logsList = document.querySelector('.logs-list');
-            logsList.innerHTML = '';
+        .then(snList => {
+            const snSelect = document.getElementById('sn-select');
+            // 保留默认选项
+            snSelect.innerHTML = '<option value="default">全局日志</option>';
             
-            logs.forEach(log => {
-                const logItem = createLogItem(log);
-                logsList.appendChild(logItem);
+            snList.forEach(sn => {
+                const option = document.createElement('option');
+                option.value = sn;
+                option.textContent = `设备 ${sn}`;
+                snSelect.appendChild(option);
             });
         })
         .catch(error => {
-            console.error('获取日志列表失败:', error);
-            alert('获取日志列表失败，请刷新页面重试');
+            console.error('获取SN列表失败:', error);
         });
 }
 
-function createLogItem(log) {
-    const div = document.createElement('div');
-    div.className = 'log-item';
-    div.innerHTML = `
-        <div class="log-info">
-            <div class="log-name">${log.name}</div>
-            <div class="log-meta">
-                大小: ${formatFileSize(log.size)} | 
-                修改时间: ${formatDate(log.modified_time)}
-            </div>
-            <div class="log-content" id="content-${log.name}"></div>
-        </div>
-        <div class="log-actions">
-            <button class="view-btn" onclick="viewLog('${log.name}', this)">查看</button>
-            <button class="download-btn" onclick="downloadLog('${log.name}')">下载</button>
-        </div>
-    `;
-    return div;
+function fetchDateList() {
+    fetch(`/api/logs/date-list/${currentSN}`)
+        .then(response => response.json())
+        .then(dates => {
+            const dateSelect = document.getElementById('date-select');
+            dateSelect.innerHTML = '';
+            
+            dates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                dateSelect.appendChild(option);
+            });
+            
+            // 默认选择最新的日期
+            if (dates.length > 0) {
+                dateSelect.value = dates[0];
+                currentDate = dates[0];
+                fetchLogContent();
+            }
+        })
+        .catch(error => {
+            console.error('获取日期列表失败:', error);
+        });
+}
+
+function handleSNChange() {
+    const snSelect = document.getElementById('sn-select');
+    currentSN = snSelect.value;
+    // 更新日期列表
+    fetchDateList();
+}
+
+function handleDateChange() {
+    const dateSelect = document.getElementById('date-select');
+    currentDate = dateSelect.value;
+    fetchLogContent();
+}
+
+function fetchLogContent() {
+    if (!currentDate) return;
+    
+    const path = currentSN === 'default' 
+        ? `default/${currentDate}.log`
+        : `${currentSN}/${currentDate}.log`;
+        
+    fetch(`/api/logs/content/${path}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(content => {
+            displayLogContent(content);
+        })
+        .catch(error => {
+            console.error('获取日志内容失败:', error);
+            const container = document.querySelector('.log-lines-container');
+            container.innerHTML = '<div class="error-message">获取日志内容失败，请重试</div>';
+        });
+}
+
+function displayLogContent(content) {
+    const container = document.querySelector('.log-lines-container');
+    // 先按行分割，然后过滤掉空行或只包含空白字符的行
+    const lines = content.split('\n').filter(line => line.trim());
+    let formattedContent = '';
+    
+    lines.forEach((line, index) => {
+        const lineNumber = index + 1;
+        const parts = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) - (\w+) - \[([^\]]+)\] - (.+)$/);
+        
+        if (parts) {
+            const [_, timestamp, level, threadName, message] = parts;
+            let messageClass = 'message';
+            if (level === 'ERROR') messageClass = 'error-message';
+            if (level === 'WARNING') messageClass = 'warning-message';
+            
+            // 解析消息中的ANSI颜色代码
+            const parsedMessage = parseAnsiColor(message);
+            
+            formattedContent += `<div class="log-line"><span class="line-number">${lineNumber}</span><div class="line-content"><span class="timestamp">${timestamp}</span> - <span class="log-level ${level.toLowerCase()}">${level}</span> - <span class="thread-name">[${threadName}]</span> - <span class="${messageClass}">${parsedMessage}</span></div></div>`;
+        } else {
+            // 解析整行的ANSI颜色代码
+            const parsedLine = parseAnsiColor(line);
+            formattedContent += `<div class="log-line"><span class="line-number">${lineNumber}</span><div class="line-content"><span class="message">${parsedLine}</span></div></div>`;
+        }
+    });
+    
+    container.innerHTML = formattedContent;
 }
 
 // ANSI颜色代码映射
@@ -70,21 +146,42 @@ const ANSI_COLORS = {
     '97': '#ffffff'  // 亮白
 };
 
-// 解析ANSI颜色代码
 function parseAnsiColor(text) {
     const regex = /\u001b\[(\d+)m(.*?)(?=\u001b|\n|$)/g;
     let result = text;
     let match;
     
-    // 替换所有ANSI颜色代码
     while ((match = regex.exec(text)) !== null) {
         const [fullMatch, colorCode, content] = match;
         const color = ANSI_COLORS[colorCode] || '#d4d4d4';
         result = result.replace(fullMatch, `<span style="color: ${color}">${content}</span>`);
     }
     
-    // 移除任何剩余的ANSI代码
     return result.replace(/\u001b\[\d+m/g, '');
+}
+
+function refreshLogs() {
+    fetchLogContent();
+}
+
+function createLogItem(log) {
+    const div = document.createElement('div');
+    div.className = 'log-item';
+    div.innerHTML = `
+        <div class="log-info">
+            <div class="log-name">${log.name}</div>
+            <div class="log-meta">
+                大小: ${formatFileSize(log.size)} | 
+                修改时间: ${formatDate(log.modified_time)}
+            </div>
+            <div class="log-content" id="content-${log.name}"></div>
+        </div>
+        <div class="log-actions">
+            <button class="view-btn" onclick="viewLog('${log.name}', this)">查看</button>
+            <button class="download-btn" onclick="downloadLog('${log.name}')">下载</button>
+        </div>
+    `;
+    return div;
 }
 
 function viewLog(logName, button) {

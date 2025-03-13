@@ -30,7 +30,21 @@ class LogHandler(SimpleHTTPRequestHandler):
         path = parsed_path.path
 
         # 处理API请求
-        if path == "/api/logs":
+        if path == "/api/logs/sn-list":
+            # 获取SN列表
+            self.send_json_response(self.get_sn_list())
+            return
+        elif path.startswith("/api/logs/date-list/"):
+            # 获取日期列表
+            sn = path.replace("/api/logs/date-list/", "")
+            self.send_json_response(self.get_date_list(sn))
+            return
+        elif path.startswith("/api/logs/content/"):
+            # 获取日志内容
+            log_path = path.replace("/api/logs/content/", "")
+            self.view_log_content(log_path)
+            return
+        elif path == "/api/logs":
             # 获取日志列表
             self.send_json_response(self.get_log_list())
             return
@@ -63,6 +77,93 @@ class LogHandler(SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')  # 允许跨域访问
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
+
+    def get_sn_list(self):
+        """获取所有SN列表"""
+        sn_list = []
+        try:
+            # 遍历日志目录
+            for item in os.listdir(LOG_DIR):
+                item_path = os.path.join(LOG_DIR, item)
+                # 如果是目录，且不是default目录，则认为是SN目录
+                if os.path.isdir(item_path) and item != 'default':
+                    sn_list.append(item)
+            sn_list.sort()  # 按字母顺序排序
+            logger.info(f"找到 {len(sn_list)} 个SN目录")
+        except Exception as e:
+            logger.error(f"获取SN列表失败: {str(e)}")
+        return sn_list
+
+    def get_date_list(self, sn):
+        """获取指定SN的日期列表"""
+        date_list = []
+        try:
+            # 确定目标目录
+            target_dir = os.path.join(LOG_DIR, 'default' if sn == 'default' else sn)
+            if not os.path.exists(target_dir):
+                logger.warning(f"目录不存在: {target_dir}")
+                return date_list
+
+            # 遍历目录中的日志文件
+            for filename in os.listdir(target_dir):
+                if filename.endswith('.log'):
+                    # 文件名就是日期
+                    date = filename[:-4]  # 移除.log后缀
+                    date_list.append(date)
+            
+            # 按日期倒序排序，最新的在前
+            date_list.sort(reverse=True)
+            logger.info(f"在 {target_dir} 中找到 {len(date_list)} 个日志文件")
+        except Exception as e:
+            logger.error(f"获取日期列表失败: {str(e)}")
+        return date_list
+
+    def view_log_content(self, log_path):
+        """查看日志内容"""
+        # 构建完整的日志文件路径
+        full_path = os.path.join(LOG_DIR, log_path)
+        full_path = os.path.normpath(full_path)  # 规范化路径
+        
+        # 安全检查：确保路径在LOG_DIR内
+        if not full_path.startswith(os.path.abspath(LOG_DIR)):
+            logger.warning(f"尝试访问日志目录外的文件: {full_path}")
+            self.send_error(403, "Access denied")
+            return
+            
+        try:
+            if not os.path.exists(full_path):
+                logger.error(f"日志文件不存在: {full_path}")
+                self.send_error(404, "Log file not found")
+                return
+                
+            if not os.access(full_path, os.R_OK):
+                logger.error(f"无权限访问日志文件: {full_path}")
+                self.send_error(403, "Permission denied")
+                return
+
+            # 获取文件大小
+            file_size = os.path.getsize(full_path)
+            
+            # 发送响应头
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Cache-Control', 'no-cache')
+            self.send_header('Content-Length', str(file_size))
+            self.end_headers()
+
+            # 读取并发送文件内容
+            with open(full_path, 'rb') as f:
+                chunk_size = 8192
+                while True:
+                    chunk = f.read(chunk_size)
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+                    
+        except Exception as e:
+            logger.error(f"读取日志内容失败 {full_path}: {str(e)}")
+            self.send_error(500, str(e))
 
     def get_log_list(self):
         logs = []
