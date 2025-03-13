@@ -17,10 +17,12 @@
         </div>
 
         <div class="clients-section">
-            <h3>已连接客户端</h3>
-            <div class="client-filter-controls">
-                <button onclick="selectAllClients(true)">全选</button>
-                <button onclick="selectAllClients(false)">取消全选</button>
+            <div class="clients-header">
+                <h3>已连接客户端</h3>
+                <div class="client-filter-controls">
+                    <button onclick="selectAllClients(true)">全选</button>
+                    <button onclick="selectAllClients(false)">取消全选</button>
+                </div>
             </div>
             <ul id="clients"></ul>
         </div>
@@ -33,11 +35,68 @@
         </div>
 
         <div class="send-message-section">
-            <h3>发送消息</h3>
-            <div style="display: flex; gap: 10px; width: 100%;">
-                <select id="client-select"></select>
-                <input type="text" id="message" placeholder="输入消息">
-                <button onclick="sendMessage()">发送</button>
+            <div class="send-header">
+                <h3>发送</h3>
+                <div class="send-controls">
+                    <select id="client-select"></select>
+                    <input type="text" id="message" placeholder="输入消息">
+                    <button onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-panels">
+                <div class="history-panel">
+                    <div class="panel-header">
+                        <h3>发送历史</h3>
+                        <button onclick="clearHistory()" class="clear-history">清空历史</button>
+                    </div>
+                    <div id="history-container"></div>
+                </div>
+                <div class="history-panel">
+                    <div class="panel-header">
+                        <h3>常用指令</h3>
+                    </div>
+                    <div class="command-list">
+                        <div class="command-item" onclick="fillCommand('AT+DEBUGTCP=47.116.219.140,45860')">
+                            <div class="command-text">AT+DEBUGTCP=47.116.219.140,45860</div>
+                            <div class="command-desc">设置调试服务器地址和端口</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+Z')">
+                            <div class="command-text">AT+Z</div>
+                            <div class="command-desc">重启设备</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+MQID')">
+                            <div class="command-text">AT+MQID</div>
+                            <div class="command-desc">查询MQTT ID</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+TASKINFO')">
+                            <div class="command-text">AT+TASKINFO</div>
+                            <div class="command-desc">查询任务信息</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+SIMPROTOCOL')">
+                            <div class="command-text">AT+SIMPROTOCOL</div>
+                            <div class="command-desc">查询简化协议版本</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+UPURL=http://47.116.219.140/simple_ota.bin')">
+                            <div class="command-text">AT+UPURL=http://47.116.219.140/simple_ota.bin</div>
+                            <div class="command-desc">升级IOT模块</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+DEVTYPE')">
+                            <div class="command-text">AT+DEVTYPE</div>
+                            <div class="command-desc">查询设备类型</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+NETP')">
+                            <div class="command-text">AT+NETP</div>
+                            <div class="command-desc">查询网络参数</div>
+                        </div>
+                        <div class="command-item" onclick="fillCommand('AT+TCPLK')">
+                            <div class="command-text">AT+TCPLK</div>
+                            <div class="command-desc">查询连接状态</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

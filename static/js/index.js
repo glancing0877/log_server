@@ -10,6 +10,47 @@ let shouldAutoScroll = true;
 let messagesContainer = null;
 let allMessages = [];  // 存储所有消息
 let filteredClients = new Set();  // 存储选中的客户端
+let messageHistory = [];  // 存储发送历史记录
+
+// 从localStorage加载历史记录
+function loadMessageHistory() {
+    const savedHistory = localStorage.getItem('messageHistory');
+    if (savedHistory) {
+        messageHistory = JSON.parse(savedHistory);
+    }
+}
+
+// 保存历史记录到localStorage
+function saveMessageHistory() {
+    localStorage.setItem('messageHistory', JSON.stringify(messageHistory));
+}
+
+// 添加消息到历史记录
+function addToMessageHistory(message) {
+    // 避免重复
+    if (!messageHistory.includes(message)) {
+        messageHistory.unshift(message);  // 添加到开头
+        if (messageHistory.length > 50) {  // 限制50条
+            messageHistory.pop();
+        }
+        saveMessageHistory();
+        updateHistoryDropdown();
+    }
+}
+
+// 更新历史记录下拉列表
+function updateHistoryDropdown() {
+    const historyList = document.getElementById('message-history');
+    if (!historyList) return;
+    
+    historyList.innerHTML = '';
+    messageHistory.forEach(msg => {
+        const option = document.createElement('option');
+        option.value = msg;
+        option.textContent = msg.length > 50 ? msg.substring(0, 47) + '...' : msg;
+        historyList.appendChild(option);
+    });
+}
 
 // 在页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
@@ -20,6 +61,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const isAtBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 10;
         shouldAutoScroll = isAtBottom;
     });
+
+    // 加载历史记录
+    loadMessageHistory();
+    
+    // 创建历史记录下拉列表
+    const messageInput = document.getElementById('message');
+    const historySelect = document.createElement('select');
+    historySelect.id = 'message-history';
+    historySelect.style.width = '100%';
+    historySelect.size = 8;  // 显示8行
+    
+    // 当选择历史记录时，填充到输入框
+    historySelect.addEventListener('change', function() {
+        if (this.value) {
+            messageInput.value = this.value;
+            this.selectedIndex = -1;  // 清除选择状态
+        }
+    });
+    
+    // 将历史记录下拉列表添加到历史区域
+    const historyContainer = document.getElementById('history-container');
+    historyContainer.appendChild(historySelect);
+    
+    // 更新历史记录显示
+    updateHistoryDropdown();
 });
 
 function selectAllClients(selected) {
@@ -220,6 +286,9 @@ function sendMessage() {
         console.log("发送消息:", messageData);
         ws.send(JSON.stringify(messageData));
         
+        // 添加到历史记录
+        addToMessageHistory(messageText);
+        
         // 清空输入框
         messageInput.value = "";
     } catch (error) {
@@ -233,4 +302,20 @@ document.getElementById("message").addEventListener("keypress", function(event) 
     if (event.key === "Enter") {
         sendMessage();
     }
-}); 
+});
+
+// 清空历史记录
+function clearHistory() {
+    if (confirm('确定要清空所有发送历史记录吗？')) {
+        messageHistory = [];
+        saveMessageHistory();
+        updateHistoryDropdown();
+    }
+}
+
+// 填充常用指令到输入框
+function fillCommand(command) {
+    const messageInput = document.getElementById("message");
+    messageInput.value = command;
+    messageInput.focus();
+} 
