@@ -27,13 +27,20 @@ function fetchSNList() {
     fetch('/api/logs/sn-list')
         .then(response => {
             console.log('SN列表响应状态:', response.status);
+            console.log('SN列表响应头:', Object.fromEntries(response.headers.entries()));
             if (!response.ok) {
                 throw new Error(`获取SN列表失败: HTTP ${response.status}`);
             }
             return response.text().then(text => {
                 console.log('SN列表原始响应:', text);
+                if (!text.trim()) {
+                    console.error('SN列表响应为空');
+                    throw new Error('SN列表响应为空');
+                }
                 try {
-                    return JSON.parse(text);
+                    const data = JSON.parse(text);
+                    console.log('解析后的SN列表数据:', data);
+                    return data;
                 } catch (e) {
                     console.error('SN列表JSON解析失败:', e);
                     throw new Error('SN列表JSON解析失败');
@@ -55,6 +62,11 @@ function fetchSNList() {
             
             // 保留默认选项
             snSelect.innerHTML = '<option value="default">全局日志</option>';
+            
+            if (snList.length === 0) {
+                console.log('SN列表为空，只保留默认选项');
+                return;
+            }
             
             snList.forEach(sn => {
                 const option = document.createElement('option');
@@ -90,50 +102,62 @@ function fetchDateList() {
             if (!response.ok) {
                 throw new Error(`获取日期列表失败: HTTP ${response.status}`);
             }
-            return response.text();
+            return response.text().then(text => {
+                console.log('日期列表原始响应:', text);
+                if (!text.trim()) {
+                    console.error('日期列表响应为空');
+                    throw new Error('日期列表响应为空');
+                }
+                try {
+                    const data = JSON.parse(text);
+                    console.log('解析后的日期列表数据:', data);
+                    return data;
+                } catch (e) {
+                    console.error('日期列表JSON解析失败:', e);
+                    throw new Error('日期列表JSON解析失败');
+                }
+            });
         })
-        .then(text => {
-            console.log('日期列表原始响应:', text);
-            try {
-                const dates = JSON.parse(text);
-                console.log('解析后的日期列表:', dates);
-                
-                if (!Array.isArray(dates)) {
-                    console.error('日期列表格式错误，期望数组但收到:', typeof dates, dates);
-                    throw new Error('日期列表格式错误');
+        .then(dates => {
+            console.log('获取到的日期列表:', dates);
+            if (!Array.isArray(dates)) {
+                console.error('日期列表格式错误，期望数组但收到:', typeof dates, dates);
+                throw new Error('日期列表格式错误');
+            }
+            
+            const dateSelect = document.getElementById('date-select');
+            if (!dateSelect) {
+                console.error('找不到日期选择器元素');
+                throw new Error('找不到日期选择器元素');
+            }
+            
+            dateSelect.innerHTML = '';
+            
+            if (dates.length === 0) {
+                console.log('日期列表为空');
+                dateSelect.innerHTML = '<option value="">无可用日期</option>';
+                const container = document.getElementById('log-lines-container');
+                if (container) {
+                    container.innerHTML = '<div class="error-message">当前设备没有可用的日志</div>';
                 }
-                
-                const dateSelect = document.getElementById('date-select');
-                if (!dateSelect) {
-                    console.error('找不到日期选择器元素');
-                    throw new Error('找不到日期选择器元素');
-                }
-                
-                dateSelect.innerHTML = '';
-                
-                if (dates.length === 0) {
-                    console.log('日期列表为空');
-                    dateSelect.innerHTML = '<option value="">无可用日期</option>';
-                    return;
-                }
-                
-                dates.forEach(date => {
-                    const option = document.createElement('option');
-                    option.value = date;
-                    option.textContent = date;
-                    dateSelect.appendChild(option);
-                });
-                
-                // 默认选择最新的日期
-                if (dates.length > 0) {
-                    currentDate = dates[0];
-                    dateSelect.value = currentDate;
-                    console.log('设置当前日期为:', currentDate);
-                    fetchLogContent();
-                }
-            } catch (e) {
-                console.error('JSON解析失败:', e);
-                throw new Error('解析日期列表JSON失败');
+                return;
+            }
+            
+            dates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                dateSelect.appendChild(option);
+            });
+            
+            console.log('日期列表更新完成，选项数量:', dateSelect.options.length);
+            
+            // 默认选择最新的日期
+            if (dates.length > 0) {
+                currentDate = dates[0];
+                dateSelect.value = currentDate;
+                console.log('设置当前日期为:', currentDate);
+                fetchLogContent();
             }
         })
         .catch(error => {
@@ -142,7 +166,7 @@ function fetchDateList() {
             if (dateSelect) {
                 dateSelect.innerHTML = '<option value="">加载失败</option>';
             }
-            const container = document.querySelector('.log-lines-container');
+            const container = document.getElementById('log-lines-container');
             if (container) {
                 container.innerHTML = `<div class="error-message">获取日期列表失败: ${error.message}</div>`;
             }
