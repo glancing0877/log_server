@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // 检查必要的DOM元素是否存在
+    const requiredElements = ['sn-select', 'date-select', 'log-lines-container'];
+    const missingElements = requiredElements.filter(id => !document.getElementById(id));
+    
+    if (missingElements.length > 0) {
+        console.error('缺少必要的DOM元素:', missingElements);
+        return;
+    }
+    
     // 初始化页面
     initializePage();
 });
@@ -18,15 +27,32 @@ function fetchSNList() {
     fetch('/api/logs/sn-list')
         .then(response => {
             console.log('SN列表响应状态:', response.status);
-            return response.json();
+            if (!response.ok) {
+                throw new Error(`获取SN列表失败: HTTP ${response.status}`);
+            }
+            return response.text().then(text => {
+                console.log('SN列表原始响应:', text);
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('SN列表JSON解析失败:', e);
+                    throw new Error('SN列表JSON解析失败');
+                }
+            });
         })
         .then(snList => {
             console.log('获取到的SN列表:', snList);
+            if (!Array.isArray(snList)) {
+                console.error('SN列表格式错误，期望数组但收到:', typeof snList, snList);
+                throw new Error('SN列表格式错误');
+            }
+            
             const snSelect = document.getElementById('sn-select');
             if (!snSelect) {
                 console.error('找不到SN选择器元素');
                 return;
             }
+            
             // 保留默认选项
             snSelect.innerHTML = '<option value="default">全局日志</option>';
             
@@ -36,7 +62,12 @@ function fetchSNList() {
                 option.textContent = `设备 ${sn}`;
                 snSelect.appendChild(option);
             });
-            console.log('SN列表更新完成');
+            
+            console.log('SN列表更新完成，选项数量:', snSelect.options.length);
+            
+            // 触发change事件以更新日期列表
+            const event = new Event('change');
+            snSelect.dispatchEvent(event);
         })
         .catch(error => {
             console.error('获取SN列表失败:', error);
@@ -120,14 +151,26 @@ function fetchDateList() {
 
 function handleSNChange() {
     const snSelect = document.getElementById('sn-select');
+    if (!snSelect) {
+        console.error('找不到SN选择器元素');
+        return;
+    }
+    
     currentSN = snSelect.value;
+    console.log('SN变更为:', currentSN);
     // 更新日期列表
     fetchDateList();
 }
 
 function handleDateChange() {
     const dateSelect = document.getElementById('date-select');
+    if (!dateSelect) {
+        console.error('找不到日期选择器元素');
+        return;
+    }
+    
     currentDate = dateSelect.value;
+    console.log('日期变更为:', currentDate);
     fetchLogContent();
 }
 
