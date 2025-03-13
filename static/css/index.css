@@ -84,6 +84,11 @@
     background: white;
     border-radius: 5px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: monospace;
+    font-size: 15px;
+    line-height: 1.5;
 }
 
 .message-time {
@@ -96,6 +101,7 @@
     background: #f8f9fa !important;
     color: #666;
     font-style: italic;
+    font-size: 14px;
 }
 
 .send-message-section {
