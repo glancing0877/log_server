@@ -4,6 +4,7 @@ import socket
 import urllib.parse
 from http.server import HTTPServer as BaseHTTPServer, SimpleHTTPRequestHandler
 from logger_config import logger, LOG_DIR
+from datetime import datetime
 
 class LogHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -108,10 +109,14 @@ class LogHandler(SimpleHTTPRequestHandler):
 
             # 遍历目录中的日志文件
             for filename in os.listdir(target_dir):
-                if filename.endswith('.log'):
-                    # 文件名就是日期
-                    date = filename[:-4]  # 移除.log后缀
-                    date_list.append(date)
+                if filename.startswith('server.log'):
+                    if filename == 'server.log':
+                        # 当前日志文件
+                        date_list.append(datetime.now().strftime('%Y-%m-%d'))
+                    else:
+                        # 历史日志文件，格式为 server.log.YYYY-MM-DD
+                        date = filename.split('.')[-1]
+                        date_list.append(date)
                     logger.info(f"找到日志文件: {filename}")
             
             # 按日期倒序排序，最新的在前
@@ -136,6 +141,21 @@ class LogHandler(SimpleHTTPRequestHandler):
             return
             
         try:
+            # 获取请求的日期
+            requested_date = os.path.basename(full_path).replace('.log', '')
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            
+            # 如果是当日日志，使用server.log
+            if requested_date == current_date:
+                sn_dir = os.path.dirname(full_path)
+                full_path = os.path.join(sn_dir, 'server.log')
+                logger.info(f"当日日志，使用server.log: {full_path}")
+            else:
+                # 历史日志，使用server.log.YYYY-MM-DD格式
+                sn_dir = os.path.dirname(full_path)
+                full_path = os.path.join(sn_dir, f'server.log.{requested_date}')
+                logger.info(f"历史日志，使用server.log.{requested_date}: {full_path}")
+            
             if not os.path.exists(full_path):
                 logger.error(f"日志文件不存在: {full_path}")
                 self.send_error(404, "Log file not found")
@@ -180,19 +200,30 @@ class LogHandler(SimpleHTTPRequestHandler):
                 logger.warning(f"日志目录不存在: {log_dir}")
                 return logs
                 
-            for filename in os.listdir(log_dir):
-                if filename.endswith('.log'):
-                    file_path = os.path.join(log_dir, filename)
-                    try:
-                        stat = os.stat(file_path)
-                        logs.append({
-                            'name': filename,
-                            'size': stat.st_size,
-                            'modified_time': int(stat.st_mtime)
-                        })
-                        logger.debug(f"找到日志文件: {filename}")
-                    except OSError as e:
-                        logger.error(f"获取日志文件信息失败 {filename}: {str(e)}")
+            # 遍历所有SN目录
+            for sn_dir in os.listdir(log_dir):
+                sn_path = os.path.join(log_dir, sn_dir)
+                if not os.path.isdir(sn_path):
+                    continue
+                    
+                # 遍历SN目录下的日志文件
+                for filename in os.listdir(sn_path):
+                    if filename.startswith('server.log'):
+                        file_path = os.path.join(sn_path, filename)
+                        try:
+                            stat = os.stat(file_path)
+                            date = filename.split('.')[-1] if filename != 'server.log' else datetime.now().strftime('%Y-%m-%d')
+                            logs.append({
+                                'name': f"{sn_dir}/{filename}",
+                                'sn': sn_dir,
+                                'date': date,
+                                'size': stat.st_size,
+                                'modified_time': int(stat.st_mtime)
+                            })
+                            logger.debug(f"找到日志文件: {filename} in {sn_dir}")
+                        except OSError as e:
+                            logger.error(f"获取日志文件信息失败 {filename}: {str(e)}")
+                            
             # 按修改时间排序，最新的在前
             logs.sort(key=lambda x: x['modified_time'], reverse=True)
             logger.info(f"共找到 {len(logs)} 个日志文件")

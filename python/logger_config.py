@@ -45,9 +45,8 @@ class SNBasedLogger:
             if not os.path.exists(sn_log_dir):
                 os.makedirs(sn_log_dir)
             
-            # 创建日期格式的文件名
-            current_date = datetime.now().strftime("%Y-%m-%d")
-            log_file = os.path.join(sn_log_dir, f"{current_date}.log")
+            # 使用固定的日志文件名
+            log_file = os.path.join(sn_log_dir, "server.log")
             
             # 文件处理器
             file_handler = TimedRotatingFileHandler(
@@ -86,12 +85,11 @@ def setup_default_logger():
         logger.addHandler(console_handler)
         
         # 默认文件处理器
-        current_date = datetime.now().strftime("%Y-%m-%d")
         default_log_dir = os.path.join(LOG_DIR, "default")
         if not os.path.exists(default_log_dir):
             os.makedirs(default_log_dir)
             
-        log_file = os.path.join(default_log_dir, f"{current_date}.log")
+        log_file = os.path.join(default_log_dir, "server.log")
         file_handler = TimedRotatingFileHandler(
             log_file,
             when="midnight",
