@@ -83,6 +83,7 @@ class TCPServer:
         self.port = port
         self.message_queue = message_queue
         self.tcp_clients = {}  # 存储TCP客户端 {addr_str: TCPClient}
+        self.sn_to_addr = {}   # 存储SN到addr_str的映射 {sn: addr_str}
 
     def handle_tcp_client(self, conn, addr):
         """ 处理TCP客户端数据接收 """
@@ -113,6 +114,23 @@ class TCPServer:
                     if "Wifi :" in decoded_data and "SN:" in decoded_data:
                         wifi_name, sn = parse_client_info(decoded_data)
                         if wifi_name and sn:
+                            # 检查是否存在重名SN
+                            if sn in self.sn_to_addr:
+                                old_addr = self.sn_to_addr[sn]
+                                if old_addr != addr_str and old_addr in self.tcp_clients:
+                                    old_client = self.tcp_clients[old_addr]
+                                    old_client.log('warning', f"检测到重复SN连接，断开旧连接: {old_addr}")
+                                    # 发送断开连接通知
+                                    self.message_queue.put({
+                                        "type": "message",
+                                        "addr": "系统",
+                                        "data": format_message("系统", f"检测到重复SN({sn})连接，断开旧连接: {old_addr}", current_time)
+                                    })
+                                    old_client.close()
+                                    del self.tcp_clients[old_addr]
+                            
+                            # 更新SN映射
+                            self.sn_to_addr[sn] = addr_str
                             client.update_info(wifi_name, sn)
                             # 更新客户端列表并发送通知
                             self.message_queue.put({
@@ -141,6 +159,9 @@ class TCPServer:
             if addr_str in self.tcp_clients:
                 current_time = get_current_time()
                 del self.tcp_clients[addr_str]
+                # 如果是有SN的设备，也要清理SN映射
+                if client.sn and client.sn in self.sn_to_addr and self.sn_to_addr[client.sn] == addr_str:
+                    del self.sn_to_addr[client.sn]
                 client.log('info', f"TCP客户端断开连接: {addr_str}")
                 # 发送断开连接通知
                 self.message_queue.put({
