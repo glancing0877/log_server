@@ -262,6 +262,21 @@
     min-width: 200px;
 }
 
+.download-button {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.download-button:hover {
+    background-color: #1976D2;
+}
+
 .logs-content {
     background-color: #1e1e1e;
     border-radius: 4px;

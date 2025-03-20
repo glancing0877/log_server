@@ -421,4 +421,25 @@ function formatDate(timestamp) {
         minute: '2-digit',
         second: '2-digit'
     });
+}
+
+function downloadCurrentLog() {
+    if (!currentDate) {
+        console.warn('没有选择日期，无法下载日志');
+        return;
+    }
+    
+    const path = currentSN === 'default' 
+        ? `default/${currentDate}.log`
+        : `${currentSN}/${currentDate}.log`;
+    
+    console.log('正在下载日志，路径:', path);
+    
+    // 创建一个隐藏的a标签来触发下载
+    const link = document.createElement('a');
+    link.href = `/api/logs/download/${path}`;
+    link.download = `${currentSN}_${currentDate}.log`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 } 
