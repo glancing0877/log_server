@@ -56,8 +56,8 @@ class LogHandler(SimpleHTTPRequestHandler):
             return
         elif path.startswith("/api/logs/download/"):
             # 下载日志文件
-            log_name = os.path.basename(path.replace("/api/logs/download/", ""))
-            self.download_log_file(log_name)
+            log_path = path.replace("/api/logs/download/", "")
+            self.download_log_file(log_path)
             return
 
         # 处理静态文件请求
@@ -295,35 +295,66 @@ class LogHandler(SimpleHTTPRequestHandler):
                 logger.error(f"发送错误响应时出错: {str(e2)}")
                 self.send_error(500, "Internal Server Error")
 
-    def download_log_file(self, log_name):
+    def download_log_file(self, log_path):
         """处理日志下载请求"""
-        log_path = os.path.abspath(os.path.join(LOG_DIR, log_name))
-        # 验证路径，确保不会访问到日志目录之外的文件
-        if not log_path.startswith(os.path.abspath(LOG_DIR)):
-            self.send_error(403, "Access denied")
-            return
-            
         try:
-            # 检查文件是否存在和可访问
-            if not os.path.exists(log_path):
-                logger.error(f"日志文件不存在: {log_path}")
+            # 规范化路径分隔符
+            log_path = log_path.replace('\\', '/').strip('/')
+            
+            # 获取请求的日期和SN
+            path_parts = log_path.split('/')
+            if len(path_parts) != 2:
+                logger.error(f"无效的日志路径格式: {log_path}")
+                self.send_error(400, "Invalid log path format")
+                return
+                
+            sn_dir, log_file = path_parts
+            requested_date = log_file.replace('.log', '')
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            
+            # 构建正确的日志文件路径
+            sn_dir_path = os.path.join(LOG_DIR, sn_dir)
+            
+            # 如果是当日日志，使用server.log
+            if requested_date == current_date:
+                full_path = os.path.join(sn_dir_path, 'server.log')
+                logger.info(f"当日日志，使用server.log: {full_path}")
+            else:
+                # 历史日志，使用server.log.YYYY-MM-DD格式
+                full_path = os.path.join(sn_dir_path, f'server.log.{requested_date}')
+                logger.info(f"历史日志，使用server.log.{requested_date}: {full_path}")
+            
+            # 规范化路径
+            full_path = os.path.normpath(full_path)
+            
+            # 安全检查：确保路径在LOG_DIR内
+            if not os.path.abspath(full_path).startswith(os.path.abspath(LOG_DIR)):
+                logger.warning(f"尝试访问日志目录外的文件: {full_path}")
+                self.send_error(403, "Access denied")
+                return
+            
+            if not os.path.exists(full_path):
+                logger.error(f"日志文件不存在: {full_path}")
                 self.send_error(404, "Log file not found")
                 return
-            if not os.access(log_path, os.R_OK):
-                logger.error(f"无权限访问日志文件: {log_path}")
+                
+            if not os.access(full_path, os.R_OK):
+                logger.error(f"无权限访问日志文件: {full_path}")
                 self.send_error(403, "Permission denied")
                 return
 
             # 获取文件大小
-            file_size = os.path.getsize(log_path)
+            file_size = os.path.getsize(full_path)
+            logger.info(f"日志文件大小: {file_size} bytes")
             
             # 准备响应头
             self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-Type', 'application/octet-stream')
+            self.send_header('Access-Control-Allow-Origin', '*')
             
-            # 对文件名进行URL编码，避免中文问题
-            encoded_filename = urllib.parse.quote(log_name)
+            # 构建下载文件名
+            download_filename = f"{sn_dir}_{requested_date}.log"
+            encoded_filename = urllib.parse.quote(download_filename)
             self.send_header('Content-Disposition', f'attachment; filename="{encoded_filename}"')
             
             # 添加下载相关头
@@ -336,7 +367,7 @@ class LogHandler(SimpleHTTPRequestHandler):
             self.end_headers()
 
             # 分块读取并发送文件内容
-            with open(log_path, 'rb') as f:
+            with open(full_path, 'rb') as f:
                 try:
                     chunk_size = 8192  # 8KB chunks
                     while True:
@@ -345,17 +376,18 @@ class LogHandler(SimpleHTTPRequestHandler):
                             break
                         self.wfile.write(chunk)
                         self.wfile.flush()
+                    logger.info(f"成功发送日志文件: {download_filename}")
                 except (ConnectionAbortedError, BrokenPipeError) as e:
                     logger.warning(f"客户端中断了下载: {str(e)}")
                     return
                 except Exception as e:
-                    logger.error(f"发送日志文件失败 {log_path}: {str(e)}")
+                    logger.error(f"发送日志文件失败 {full_path}: {str(e)}")
                     if not self.wfile.closed:
                         self.send_error(500, "Internal Server Error")
                     return
 
         except Exception as e:
-            logger.error(f"处理日志下载请求时出错 {log_path}: {str(e)}")
+            logger.error(f"处理日志下载请求时出错: {str(e)}")
             try:
                 error_msg = str(e).encode('ascii', 'replace').decode('ascii')
                 self.send_error(500, error_msg)
