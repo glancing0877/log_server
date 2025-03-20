@@ -14,12 +14,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 let currentSN = 'default';
 let currentDate = null;
+let currentChunk = 0;
+let totalChunks = 0;
+let isLoading = false;
 
 function initializePage() {
-    // 获取可用的SN列表
+    console.log('初始化页面');
+    
+    // 获取SN列表
     fetchSNList();
-    // 获取当前选择的SN的日期列表
-    fetchDateList();
+    
+    // 添加滚动监听
+    const logViewer = document.querySelector('.log-viewer');
+    if (logViewer) {
+        logViewer.addEventListener('scroll', handleScroll);
+    }
 }
 
 function fetchSNList() {
@@ -204,6 +213,35 @@ function handleDateChange() {
     fetchLogContent();
 }
 
+function showLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+    isLoading = false;
+}
+
+function showLoadMore() {
+    const loadMore = document.getElementById('load-more');
+    if (loadMore) {
+        loadMore.style.display = 'block';
+    }
+}
+
+function hideLoadMore() {
+    const loadMore = document.getElementById('load-more');
+    if (loadMore) {
+        loadMore.style.display = 'none';
+    }
+}
+
 function fetchLogContent() {
     if (!currentDate) {
         console.warn('没有选择日期，跳过获取日志内容');
@@ -215,19 +253,64 @@ function fetchLogContent() {
         : `${currentSN}/${currentDate}.log`;
     
     console.log('正在获取日志内容，路径:', path);
-        
-    fetch(`/api/logs/content/${path}`)
+    
+    // 重置分片状态
+    currentChunk = 0;
+    totalChunks = 0;
+    
+    // 清空现有内容
+    const container = document.getElementById('log-lines-container');
+    if (container) {
+        container.innerHTML = '';
+    }
+    
+    // 显示加载动画
+    showLoading();
+    
+    // 获取第一片日志内容
+    loadMoreLogs();
+}
+
+function loadMoreLogs() {
+    if (isLoading) {
+        console.warn('正在加载中，请等待...');
+        return;
+    }
+    
+    if (!currentDate) {
+        console.warn('没有选择日期，跳过加载更多');
+        return;
+    }
+    
+    const path = currentSN === 'default' 
+        ? `default/${currentDate}.log`
+        : `${currentSN}/${currentDate}.log`;
+    
+    const url = `/api/logs/content/${path}?chunk_size=1000&chunk_index=${currentChunk}`;
+    console.log('正在获取日志分片:', url);
+    
+    isLoading = true;
+    showLoading();
+    
+    fetch(url)
         .then(response => {
-            console.log('日志内容响应状态:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response.text();
+            return response.json();
         })
-        .then(content => {
-            console.log('成功获取日志内容，长度:', content.length);
-            console.log('日志内容前100个字符:', content.substring(0, 100));
-            displayLogContent(content);
+        .then(data => {
+            console.log('成功获取日志分片:', data);
+            
+            // 更新分片信息
+            currentChunk = data.current_chunk + 1; // 递增当前分片索引
+            totalChunks = data.total_chunks;
+            
+            // 处理日志内容
+            const container = document.getElementById('log-lines-container');
+            if (container) {
+                displayLogContent(data.content, data.start_line);
+            }
         })
         .catch(error => {
             console.error('获取日志内容失败:', error);
@@ -235,10 +318,13 @@ function fetchLogContent() {
             if (container) {
                 container.innerHTML = '<div class="error-message">获取日志内容失败，请重试</div>';
             }
+        })
+        .finally(() => {
+            hideLoading();
         });
 }
 
-function displayLogContent(content) {
+function displayLogContent(content, startLine) {
     console.log('开始处理日志内容');
     const container = document.getElementById('log-lines-container');
     if (!container) {
@@ -248,11 +334,10 @@ function displayLogContent(content) {
     
     // 先按行分割，然后过滤掉空行或只包含空白字符的行
     const lines = content.split('\n').filter(line => line.trim());
-    console.log('处理后的日志行数:', lines.length);
-    let formattedContent = '';
     
+    // 创建日志行容器
     lines.forEach((line, index) => {
-        const lineNumber = index + 1;
+        const lineNumber = startLine + index + 1;
         const parts = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) - (\w+) - \[([^\]]+)\] - (.+)$/);
         
         if (parts) {
@@ -264,17 +349,35 @@ function displayLogContent(content) {
             // 解析消息中的ANSI颜色代码
             const parsedMessage = parseAnsiColor(message);
             
-            formattedContent += `<div class="log-line"><span class="line-number">${lineNumber}</span><div class="line-content"><span class="timestamp">${timestamp}</span> - <span class="log-level ${level.toLowerCase()}">${level}</span> - <span class="thread-name">[${threadName}]</span> - <span class="${messageClass}">${parsedMessage}</span></div></div>`;
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            logLine.innerHTML = `
+                <div class="line-number">${lineNumber}</div>
+                <div class="line-content">
+                    <span class="timestamp">${timestamp}</span>
+                    <span>-</span>
+                    <span class="log-level ${level.toLowerCase()}">${level}</span>
+                    <span>-</span>
+                    <span class="thread-name">[${threadName}]</span>
+                    <span>-</span>
+                    <span class="${messageClass}">${parsedMessage}</span>
+                </div>
+            `;
+            container.appendChild(logLine);
         } else {
             // 解析整行的ANSI颜色代码
             const parsedLine = parseAnsiColor(line);
-            formattedContent += `<div class="log-line"><span class="line-number">${lineNumber}</span><div class="line-content"><span class="message">${parsedLine}</span></div></div>`;
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            logLine.innerHTML = `
+                <div class="line-number">${lineNumber}</div>
+                <div class="line-content">
+                    <span class="message">${parsedLine}</span>
+                </div>
+            `;
+            container.appendChild(logLine);
         }
     });
-    
-    console.log('设置日志内容到容器');
-    container.innerHTML = formattedContent;
-    console.log('日志内容设置完成');
 }
 
 // ANSI颜色代码映射
@@ -442,4 +545,17 @@ function downloadCurrentLog() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// 处理滚动事件
+function handleScroll(event) {
+    if (isLoading) return;
+    
+    const logViewer = event.target;
+    const scrollBottom = logViewer.scrollHeight - logViewer.scrollTop - logViewer.clientHeight;
+    
+    // 当滚动到距离底部100px时触发加载
+    if (scrollBottom < 100 && currentChunk < totalChunks - 1) {
+        loadMoreLogs();
+    }
 } 

@@ -128,33 +128,41 @@ class LogHandler(SimpleHTTPRequestHandler):
 
     def view_log_content(self, log_path):
         """查看日志内容"""
-        # 构建完整的日志文件路径
-        full_path = os.path.join(LOG_DIR, log_path)
-        full_path = os.path.normpath(full_path)  # 规范化路径
-        
-        logger.info(f"请求查看日志文件: {full_path}")
-        
-        # 安全检查：确保路径在LOG_DIR内
-        if not full_path.startswith(os.path.abspath(LOG_DIR)):
-            logger.warning(f"尝试访问日志目录外的文件: {full_path}")
-            self.send_error(403, "Access denied")
-            return
-            
         try:
-            # 获取请求的日期
-            requested_date = os.path.basename(full_path).replace('.log', '')
+            # 规范化路径分隔符
+            log_path = log_path.replace('\\', '/').strip('/')
+            
+            # 获取请求的日期和SN
+            path_parts = log_path.split('/')
+            if len(path_parts) != 2:
+                logger.error(f"无效的日志路径格式: {log_path}")
+                self.send_error(400, "Invalid log path format")
+                return
+                
+            sn_dir, log_file = path_parts
+            requested_date = log_file.replace('.log', '')
             current_date = datetime.now().strftime('%Y-%m-%d')
+            
+            # 构建正确的日志文件路径
+            sn_dir_path = os.path.join(LOG_DIR, sn_dir)
             
             # 如果是当日日志，使用server.log
             if requested_date == current_date:
-                sn_dir = os.path.dirname(full_path)
-                full_path = os.path.join(sn_dir, 'server.log')
+                full_path = os.path.join(sn_dir_path, 'server.log')
                 logger.info(f"当日日志，使用server.log: {full_path}")
             else:
                 # 历史日志，使用server.log.YYYY-MM-DD格式
-                sn_dir = os.path.dirname(full_path)
-                full_path = os.path.join(sn_dir, f'server.log.{requested_date}')
+                full_path = os.path.join(sn_dir_path, f'server.log.{requested_date}')
                 logger.info(f"历史日志，使用server.log.{requested_date}: {full_path}")
+            
+            # 规范化路径
+            full_path = os.path.normpath(full_path)
+            
+            # 安全检查：确保路径在LOG_DIR内
+            if not os.path.abspath(full_path).startswith(os.path.abspath(LOG_DIR)):
+                logger.warning(f"尝试访问日志目录外的文件: {full_path}")
+                self.send_error(403, "Access denied")
+                return
             
             if not os.path.exists(full_path):
                 logger.error(f"日志文件不存在: {full_path}")
@@ -166,27 +174,46 @@ class LogHandler(SimpleHTTPRequestHandler):
                 self.send_error(403, "Permission denied")
                 return
 
-            # 获取文件大小
-            file_size = os.path.getsize(full_path)
-            logger.info(f"日志文件大小: {file_size} bytes")
+            # 获取分片参数
+            query_params = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            chunk_size = int(query_params.get('chunk_size', [1000])[0])  # 默认每片1000行
+            chunk_index = int(query_params.get('chunk_index', [0])[0])  # 默认从第0片开始
             
-            # 发送响应头
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/plain; charset=utf-8')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Cache-Control', 'no-cache')
-            self.send_header('Content-Length', str(file_size))
-            self.end_headers()
-
-            # 读取并发送文件内容
+            # 读取文件内容
             with open(full_path, 'rb') as f:
-                content = f.read()
-                logger.info(f"成功读取日志内容，长度: {len(content)} bytes")
-                self.wfile.write(content)
-                logger.info("成功发送日志内容")
+                content = f.read().decode('utf-8')
+                lines = content.split('\n')
+                total_lines = len(lines)
+                
+                # 计算当前分片的起始和结束行
+                start_line = chunk_index * chunk_size
+                end_line = min(start_line + chunk_size, total_lines)
+                
+                # 获取当前分片的内容
+                chunk_content = '\n'.join(lines[start_line:end_line])
+                
+                # 发送响应头
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Cache-Control', 'no-cache')
+                self.end_headers()
+                
+                # 发送JSON响应
+                response_data = {
+                    'content': chunk_content,
+                    'total_lines': total_lines,
+                    'current_chunk': chunk_index,
+                    'total_chunks': (total_lines + chunk_size - 1) // chunk_size,
+                    'start_line': start_line,
+                    'end_line': end_line
+                }
+                
+                self.wfile.write(json.dumps(response_data).encode())
+                logger.info(f"成功发送日志分片 {chunk_index + 1}/{response_data['total_chunks']}")
                     
         except Exception as e:
-            logger.error(f"读取日志内容失败 {full_path}: {str(e)}")
+            logger.error(f"读取日志内容失败: {str(e)}")
             self.send_error(500, str(e))
 
     def get_log_list(self):
