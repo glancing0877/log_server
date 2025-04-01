@@ -31,9 +31,13 @@ function initializePage() {
     }
 }
 
+// 获取当前页面的协议和域名
+const baseUrl = `${window.location.protocol}//${window.location.hostname}:8080`;
+
 function fetchSNList() {
     console.log('开始获取SN列表');
-    fetch('/api/logs/sn-list')
+    // 拼接端口号和API路径
+    fetch(`${baseUrl}/api/logs/sn-list`)
         .then(response => {
             console.log('SN列表响应状态:', response.status);
             console.log('SN列表响应头:', Object.fromEntries(response.headers.entries()));
@@ -103,9 +107,8 @@ function fetchSNList() {
 
 function fetchDateList() {
     console.log('开始获取日期列表，当前SN:', currentSN);
-    const url = `/api/logs/date-list/${currentSN}`;
+    const url = `${baseUrl}/api/logs/date-list/${currentSN}`;
     console.log('请求URL:', url);
-    
     fetch(url)
         .then(response => {
             console.log('日期列表响应状态:', response.status);
@@ -247,13 +250,10 @@ function fetchLogContent() {
         console.warn('没有选择日期，跳过获取日志内容');
         return;
     }
-    
     const path = currentSN === 'default' 
         ? `default/${currentDate}.log`
         : `${currentSN}/${currentDate}.log`;
-    
     console.log('正在获取日志内容，路径:', path);
-    
     // 重置分片状态
     currentChunk = 0;
     totalChunks = 0;
@@ -558,4 +558,4 @@ function handleScroll(event) {
     if (scrollBottom < 100 && currentChunk < totalChunks - 1) {
         loadMoreLogs();
     }
-} 
+}
