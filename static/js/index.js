@@ -5,7 +5,7 @@ const WS_PORT = 8765;
 const SERVER_URL = `http://${SERVER_HOST}:${SERVER_PORT}`;
 const WS_URL = `ws://${SERVER_HOST}:${WS_PORT}`;
 
-const ws = new WebSocket(WS_URL);
+// 移除此处的ws声明,因为后面已经重新声明了ws变量
 let shouldAutoScroll = true;
 let messagesContainer = null;
 let allMessages = [];  // 存储所有消息
@@ -220,25 +220,114 @@ function scrollToBottom() {
 }
 
 // 添加WebSocket连接状态处理
-ws.onopen = function() {
-    console.log("WebSocket连接已建立");
-    document.querySelector('button').disabled = false;
-    // 请求初始化数据
-    ws.send(JSON.stringify({
-        type: "init",
-        message: "request_current_state"
-    }));
-};
+// 添加重连相关变量
+let ws;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 10;
+const baseReconnectDelay = 1000; // 初始重连延迟1秒
 
-ws.onerror = function(error) {
-    console.error("WebSocket错误:", error);
-    alert("连接服务器失败，请检查服务器是否运行");
-};
+// WebSocket连接函数
+function connectWebSocket() {
+    ws = new WebSocket(WS_URL);  // Use the configured WS_URL instead of hardcoded value
+    
+    ws.onopen = function() {
+        console.log("WebSocket连接已建立");
+        reconnectAttempts = 0; // 重置重连次数
+        document.querySelector('button').disabled = false;
+        // 更新状态显示
+        const wsStatus = document.getElementById('ws-status');
+        wsStatus.textContent = 'WebSocket: 已连接';
+        wsStatus.className = 'ws-status connected';
+        // 请求初始化数据
+        ws.send(JSON.stringify({
+            type: "init",
+            message: "request_current_state"
+        }));
+    };
 
-ws.onclose = function() {
-    console.log("WebSocket连接已关闭");
-    document.querySelector('button').disabled = true;
-};
+    ws.onclose = function() {
+        console.log("WebSocket连接已关闭");
+        document.querySelector('button').disabled = true;
+        // 更新状态显示
+        const wsStatus = document.getElementById('ws-status');
+        wsStatus.textContent = 'WebSocket: 已断开，正在重连...';
+        wsStatus.className = 'ws-status disconnected';
+        
+        // 计算重连延迟时间（指数退避）
+        const delay = baseReconnectDelay * Math.pow(2, reconnectAttempts);
+        
+        if (reconnectAttempts < maxReconnectAttempts) {
+            console.log(`${delay/1000}秒后尝试重连...`);
+            setTimeout(() => {
+                reconnectAttempts++;
+                connectWebSocket();
+            }, delay);
+        } else {
+            wsStatus.textContent = 'WebSocket: 重连失败，请刷新页面';
+            console.log("达到最大重连次数，停止重连");
+        }
+    };
+
+    ws.onerror = function(error) {
+        console.error("WebSocket错误:", error);
+        // 更新状态显示
+        const wsStatus = document.getElementById('ws-status');
+        wsStatus.textContent = 'WebSocket: 连接错误';
+        wsStatus.className = 'ws-status disconnected';
+    };
+
+    // Move the onmessage handler inside connectWebSocket
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.type === "client_update") {
+            document.getElementById("client-count").innerText = data.clients.length;
+            let clientList = document.getElementById("clients");
+            let select = document.getElementById("client-select");
+            clientList.innerHTML = "";
+            select.innerHTML = "";
+            
+            data.clients.forEach(client => {
+                // 使用新的创建列表项函数
+                const li = updateClientListItem(client);
+                clientList.appendChild(li);
+
+                // 更新发送消息的下拉框
+                let option = document.createElement("option");
+                option.value = client;
+                option.innerText = client;
+                select.appendChild(option);
+            });
+
+            // 如果是首次加载，默认选中所有客户端
+            if (filteredClients.size === 0) {
+                selectAllClients(true);
+            }
+        } else if (data.type === "message") {
+            // 保存消息
+            allMessages.push(data);
+            
+            // 更新消息计数
+            updateAllClientCounts();
+            
+            // 如果消息应该显示，则添加到界面
+            if (shouldShowMessage(data)) {
+                let messages = document.getElementById("messages");
+                let div = document.createElement("div");
+                
+                if (data.addr === "系统") {
+                    div.className = "system-message";
+                }
+                
+                // 使用ANSI解析器处理消息内容
+                div.innerHTML = parseAnsiToHtml(data.data);
+                messages.appendChild(div);
+                scrollToBottom();
+            }
+        }
+    };
+
+    // Remove the alert from here as it should only show on error
+}
 
 // 获取每个客户端的消息数量
 function getClientMessageCount(clientId) {
@@ -283,55 +372,6 @@ function updateAllClientCounts() {
         countSpan.textContent = getClientMessageCount(clientId);
     });
 }
-
-ws.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    if (data.type === "client_update") {
-        document.getElementById("client-count").innerText = data.clients.length;
-        let clientList = document.getElementById("clients");
-        let select = document.getElementById("client-select");
-        clientList.innerHTML = "";
-        select.innerHTML = "";
-        
-        data.clients.forEach(client => {
-            // 使用新的创建列表项函数
-            const li = updateClientListItem(client);
-            clientList.appendChild(li);
-
-            // 更新发送消息的下拉框
-            let option = document.createElement("option");
-            option.value = client;
-            option.innerText = client;
-            select.appendChild(option);
-        });
-
-        // 如果是首次加载，默认选中所有客户端
-        if (filteredClients.size === 0) {
-            selectAllClients(true);
-        }
-    } else if (data.type === "message") {
-        // 保存消息
-        allMessages.push(data);
-        
-        // 更新消息计数
-        updateAllClientCounts();
-        
-        // 如果消息应该显示，则添加到界面
-        if (shouldShowMessage(data)) {
-            let messages = document.getElementById("messages");
-            let div = document.createElement("div");
-            
-            if (data.addr === "系统") {
-                div.className = "system-message";
-            }
-            
-            // 使用ANSI解析器处理消息内容
-            div.innerHTML = parseAnsiToHtml(data.data);
-            messages.appendChild(div);
-            scrollToBottom();
-        }
-    }
-};
 
 function sendMessage() {
     const select = document.getElementById("client-select");
@@ -395,4 +435,9 @@ function fillCommand(command) {
     const messageInput = document.getElementById("message");
     messageInput.value = command;
     messageInput.focus();
-} 
+}
+
+// 页面加载时启动WebSocket连接
+document.addEventListener('DOMContentLoaded', function() {
+    connectWebSocket();
+});

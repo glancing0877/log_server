@@ -332,4 +332,26 @@
 
 .command-item:last-child {
     border-bottom: none;
-} 
+}
+
+.ws-status {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.ws-status.connected {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.ws-status.disconnected {
+    background-color: #f44336;
+    color: white;
+}
+
+.ws-status.connecting {
+    background-color: #ff9800;
+    color: white;
+}
