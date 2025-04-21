@@ -31,9 +31,13 @@ function initializePage() {
     }
 }
 
+// 获取当前页面的协议和域名
+const baseUrl = `${window.location.protocol}//${window.location.hostname}:8080`;
+
 function fetchSNList() {
     console.log('开始获取SN列表');
-    fetch('/api/logs/sn-list')
+    // 拼接端口号和API路径
+    fetch(`${baseUrl}/api/logs/sn-list`)
         .then(response => {
             console.log('SN列表响应状态:', response.status);
             console.log('SN列表响应头:', Object.fromEntries(response.headers.entries()));
@@ -103,9 +107,8 @@ function fetchSNList() {
 
 function fetchDateList() {
     console.log('开始获取日期列表，当前SN:', currentSN);
-    const url = `/api/logs/date-list/${currentSN}`;
+    const url = `${baseUrl}/api/logs/date-list/${currentSN}`;
     console.log('请求URL:', url);
-    
     fetch(url)
         .then(response => {
             console.log('日期列表响应状态:', response.status);
@@ -247,13 +250,10 @@ function fetchLogContent() {
         console.warn('没有选择日期，跳过获取日志内容');
         return;
     }
-    
     const path = currentSN === 'default' 
         ? `default/${currentDate}.log`
         : `${currentSN}/${currentDate}.log`;
-    
     console.log('正在获取日志内容，路径:', path);
-    
     // 重置分片状态
     currentChunk = 0;
     totalChunks = 0;
@@ -276,22 +276,22 @@ function loadMoreLogs() {
         console.warn('正在加载中，请等待...');
         return;
     }
-    
+
     if (!currentDate) {
         console.warn('没有选择日期，跳过加载更多');
         return;
     }
-    
+
     const path = currentSN === 'default' 
         ? `default/${currentDate}.log`
         : `${currentSN}/${currentDate}.log`;
-    
-    const url = `/api/logs/content/${path}?chunk_size=1000&chunk_index=${currentChunk}`;
+
+    const url = `${baseUrl}/api/logs/content/${path}?chunk_size=1000&chunk_index=${currentChunk}`;
     console.log('正在获取日志分片:', url);
-    
+
     isLoading = true;
     showLoading();
-    
+
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -441,14 +441,15 @@ function createLogItem(log) {
 function viewLog(logName, button) {
     const contentDiv = document.getElementById(`content-${logName}`);
     const isActive = contentDiv.classList.contains('active');
-    
+
     if (isActive) {
         contentDiv.classList.remove('active');
         button.textContent = '查看';
         return;
     }
 
-    fetch(`/api/logs/view/${logName}`)
+    const url = `${baseUrl}/api/logs/view/${logName}`; // 修改请求URL
+    fetch(url)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -497,33 +498,12 @@ function viewLog(logName, button) {
 
 function downloadLog(logName) {
     const link = document.createElement('a');
-    link.href = `/api/logs/${logName}/download`;
+    const url = `${baseUrl}/api/logs/${logName}/download`; // 修改请求URL
+    link.href = url;
     link.download = logName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}
-
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function formatDate(timestamp) {
-    if (!timestamp) return 'Unknown';
-    const date = new Date(timestamp * 1000);
-    if (isNaN(date.getTime())) return 'Invalid Date';
-    return date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
 }
 
 function downloadCurrentLog() {
@@ -531,16 +511,16 @@ function downloadCurrentLog() {
         console.warn('没有选择日期，无法下载日志');
         return;
     }
-    
+
     const path = currentSN === 'default' 
         ? `default/${currentDate}.log`
         : `${currentSN}/${currentDate}.log`;
-    
+
     console.log('正在下载日志，路径:', path);
-    
-    // 创建一个隐藏的a标签来触发下载
+
     const link = document.createElement('a');
-    link.href = `/api/logs/download/${path}`;
+    const url = `${baseUrl}/api/logs/download/${path}`; // 修改请求URL
+    link.href = url;
     link.download = `${currentSN}_${currentDate}.log`;
     document.body.appendChild(link);
     link.click();
@@ -558,4 +538,4 @@ function handleScroll(event) {
     if (scrollBottom < 100 && currentChunk < totalChunks - 1) {
         loadMoreLogs();
     }
-} 
+}
