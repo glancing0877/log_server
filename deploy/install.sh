@@ -22,9 +22,21 @@ cp -r ./* /opt/log_server/
 # 部署到网站根目录
 echo "正在部署到网站根目录..."
 mkdir -p /home/wwwroot/default
-cp -r index.html static /home/wwwroot/default/
-chown -R www-data:www-data /home/wwwroot/default
-chmod -R 755 /home/wwwroot/default
+# 创建临时目录用于复制和设置权限
+TEMP_DIR=$(mktemp -d)
+cp -r index.html static "${TEMP_DIR}/"
+
+# 设置临时目录中文件的权限
+find "${TEMP_DIR}" -type f -exec chown www-data:www-data {} \;
+find "${TEMP_DIR}" -type f -exec chmod 644 {} \;
+find "${TEMP_DIR}" -type d -exec chown www-data:www-data {} \;
+find "${TEMP_DIR}" -type d -exec chmod 755 {} \;
+
+# 将设置好权限的文件复制到目标目录
+cp -r "${TEMP_DIR}"/* /home/wwwroot/default/
+
+# 清理临时目录
+rm -rf "${TEMP_DIR}"
 
 # 设置权限
 echo "正在设置文件权限..."
