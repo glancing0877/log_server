@@ -9,8 +9,6 @@ fi
 
 echo "开始安装日志服务器..."
 
-
-
 # 创建服务用户
 echo "正在创建服务用户..."
 useradd -r -s /bin/false logserver || echo "用户已存在，跳过创建"
@@ -20,6 +18,13 @@ echo "正在创建部署目录..."
 mkdir -p /opt/log_server
 cd "$(dirname "$0")/.."
 cp -r ./* /opt/log_server/
+
+# 部署到网站根目录
+echo "正在部署到网站根目录..."
+mkdir -p /home/wwwroot/default
+cp -r index.html static /home/wwwroot/default/
+chown -R www-data:www-data /home/wwwroot/default
+chmod -R 755 /home/wwwroot/default
 
 # 设置权限
 echo "正在设置文件权限..."
@@ -78,6 +83,10 @@ echo "
 - TCP服务端口: 45860
 - WebSocket端口: 8765
 
+访问方式：
+1. 通过服务端口访问：http://服务器IP:8080
+2. 通过网站根目录访问：http://服务器IP/
+
 常用命令：
 - 启动服务: systemctl start log_server
 - 停止服务: systemctl stop log_server
@@ -90,4 +99,4 @@ echo "
 - 系统日志: journalctl -u log_server
 
 如果遇到问题，请检查以上日志文件。
-" 
+"
